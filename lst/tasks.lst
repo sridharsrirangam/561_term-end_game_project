@@ -9437,6 +9437,7 @@ X__declspec(noreturn) void Task_Init(void) {
 N	
 N	os_mut_init(&LCD_mutex);
 X	_os_mut_init((U32)rt_mut_init,&LCD_mutex);
+N	//os_mbx_declare(&ACCL_mailbox,1);
 N	
 N	t_Read_TS = os_tsk_create(Task_Read_TS, 4);
 X	t_Read_TS = _os_tsk_create((U32)rt_tsk_create,Task_Read_TS,4,0,0);
@@ -9629,7 +9630,7 @@ N				while(1);
 N			}
 N					coin_Y_pos=100;
 N			
-W "src\tasks.c" 210 18 function "rand" declared implicitly
+W "src\tasks.c" 211 18 function "rand" declared implicitly
 N					coin_X_pos=(rand()) % 230;
 N				}
 N			TFT_Fill_Rectangle(&c1,&c2,&paddle_color);
@@ -9638,5 +9639,5 @@ N
 N		PTB->PCOR = MASK(DEBUG_T3_POS);
 X		((GPIO_Type *)(0x400FF040u))->PCOR = (1UL << (3));
 N	}
-W "src\tasks.c" 151 20 variable "d1" was set but never used
+W "src\tasks.c" 152 20 variable "d1" was set but never used
 N}
