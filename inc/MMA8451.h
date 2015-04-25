@@ -24,7 +24,7 @@ void read_full_xyz(void);
 void read_xyz(void);
 void convert_xyz_to_roll_pitch(void);
 
-extern float roll, pitch;
+extern float roll;
 extern int16_t acc_X, acc_Y, acc_Z;
 
 #endif

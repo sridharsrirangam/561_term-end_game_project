@@ -9398,7 +9398,7 @@ Nvoid read_full_xyz(void);
 Nvoid read_xyz(void);
 Nvoid convert_xyz_to_roll_pitch(void);
 N
-Nextern float roll, pitch;
+Nextern float roll;
 Nextern int16_t acc_X, acc_Y, acc_Z;
 N
 N#endif

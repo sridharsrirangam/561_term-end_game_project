@@ -9295,7 +9295,7 @@ Nvoid read_full_xyz(void);
 Nvoid read_xyz(void);
 Nvoid convert_xyz_to_roll_pitch(void);
 N
-Nextern float roll, pitch;
+Nextern float roll;
 Nextern int16_t acc_X, acc_Y, acc_Z;
 N
 N#endif
@@ -9386,6 +9386,7 @@ Nint16_t coin_X_pos=100;
 Nint16_t coin_Y_pos=100;
 Nint16_t score=0;
 Nint16_t life=3;
+N
 Nvoid Init_Debug_Signals(void) {
 N	// Enable clock to port B
 N	SIM->SCGC5 |= SIM_SCGC5_PORTB_MASK;
@@ -9519,6 +9520,17 @@ X		((GPIO_Type *)(0x400FF040u))->PSOR = (1UL << (0));
 N		read_full_xyz();
 N		convert_xyz_to_roll_pitch();
 N
+N#if 0
+S		sprintf(buffer, "Score: %d", score);
+S		os_mut_wait(&LCD_mutex, WAIT_FOREVER);
+S		TFT_Text_PrintStr_RC(2, 0, buffer);
+S		os_mut_release(&LCD_mutex);
+S
+S		sprintf(buffer, "Life: %d", life);
+S		os_mut_wait(&LCD_mutex, WAIT_FOREVER);
+S		TFT_Text_PrintStr_RC(3, 0, buffer);
+S		os_mut_release(&LCD_mutex);
+N#endif
 N		sprintf(buffer, "Score: %d", score);
 N		os_mut_wait(&LCD_mutex, WAIT_FOREVER);
 X		_os_mut_wait((U32)rt_mut_wait,&LCD_mutex,(0xffff));
@@ -9621,8 +9633,8 @@ N				while(1);
 N			}
 N					coin_Y_pos=100;
 N			
-W "src\tasks.c" 200 17 function "rand" declared implicitly
-N					coin_X_pos=rand()%240;
+W "src\tasks.c" 212 18 function "rand" declared implicitly
+N					coin_X_pos=(rand()) % 230;
 N				}
 N			TFT_Fill_Rectangle(&c1,&c2,&paddle_color);
 N		//  TFT_Plot_Pixel(&d1,&paddle_color);
@@ -9630,5 +9642,5 @@ N
 N		PTB->PCOR = MASK(DEBUG_T3_POS);
 X		((GPIO_Type *)(0x400FF040u))->PCOR = (1UL << (3));
 N	}
-W "src\tasks.c" 141 20 variable "d1" was set but never used
+W "src\tasks.c" 153 20 variable "d1" was set but never used
 N}

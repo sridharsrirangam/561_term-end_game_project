@@ -22,6 +22,7 @@ int16_t coin_X_pos=100;
 int16_t coin_Y_pos=100;
 int16_t score=0;
 int16_t life=3;
+
 void Init_Debug_Signals(void) {
 	// Enable clock to port B
 	SIM->SCGC5 |= SIM_SCGC5_PORTB_MASK;
@@ -118,6 +119,7 @@ __task void Task_Read_Accelerometer(void) {
 		read_full_xyz();
 		convert_xyz_to_roll_pitch();
 
+#if 0
 		sprintf(buffer, "Score: %d", score);
 		os_mut_wait(&LCD_mutex, WAIT_FOREVER);
 		TFT_Text_PrintStr_RC(2, 0, buffer);
@@ -126,6 +128,12 @@ __task void Task_Read_Accelerometer(void) {
 		sprintf(buffer, "Life: %d", life);
 		os_mut_wait(&LCD_mutex, WAIT_FOREVER);
 		TFT_Text_PrintStr_RC(3, 0, buffer);
+		os_mut_release(&LCD_mutex);
+#endif
+		
+		sprintf(buffer, "Roll: %d", roll);
+		os_mut_wait(&LCD_mutex, WAIT_FOREVER);
+		TFT_Text_PrintStr_RC(2, 0, buffer);
 		os_mut_release(&LCD_mutex);
 
 		PTB->PCOR = MASK(DEBUG_T0_POS);
@@ -197,7 +205,7 @@ __task void Task_Update_Screen(void) {
 			}
 					coin_Y_pos=100;
 			
-					coin_X_pos=rand()%240;
+					coin_X_pos=(rand()) % 230;
 				}
 			TFT_Fill_Rectangle(&c1,&c2,&paddle_color);
 		//  TFT_Plot_Pixel(&d1,&paddle_color);

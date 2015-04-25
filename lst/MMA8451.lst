@@ -7305,7 +7305,7 @@ Nvoid read_full_xyz(void);
 Nvoid read_xyz(void);
 Nvoid convert_xyz_to_roll_pitch(void);
 N
-Nextern float roll, pitch;
+Nextern float roll;
 Nextern int16_t acc_X, acc_Y, acc_Z;
 N
 N#endif
@@ -8830,7 +8830,7 @@ Svolatile float x, y;
 N#endif
 N
 Nint16_t acc_X=0, acc_Y=0, acc_Z=0;
-Nfloat roll=0.0, pitch=0.0;
+Nfloat roll=0.0;
 N
 N//mma data ready
 Nextern uint32_t DATA_READY;
@@ -8972,11 +8972,10 @@ N*/
 N	
 N	roll = approx_atan2f(acc_Y, acc_Z)*(180/M_PI);
 X	roll = approx_atan2f(acc_Y, acc_Z)*(180/(3.14159265));
-N	pitch = approx_atan2f(acc_X, approx_sqrtf(acc_Y*acc_Y + acc_Z*acc_Z))*(180/M_PI);
-X	pitch = approx_atan2f(acc_X, approx_sqrtf(acc_Y*acc_Y + acc_Z*acc_Z))*(180/(3.14159265));
+N	//pitch = approx_atan2f(acc_X, approx_sqrtf(acc_Y*acc_Y + acc_Z*acc_Z))*(180/M_PI);
 N#if 0	
 S	roll = atan2(ay, az)*180/M_PI;
-S	pitch = atan2(ax, sqrt(ay*ay + az*az))*180/M_PI;
+S	//pitch = atan2(ax, sqrt(ay*ay + az*az))*180/M_PI;
 N#endif
 N}
 N

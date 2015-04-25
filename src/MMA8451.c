@@ -14,7 +14,7 @@ volatile float x, y;
 #endif
 
 int16_t acc_X=0, acc_Y=0, acc_Z=0;
-float roll=0.0, pitch=0.0;
+float roll=0.0;
 
 //mma data ready
 extern uint32_t DATA_READY;
@@ -141,10 +141,10 @@ void convert_xyz_to_roll_pitch(void) {
 */
 	
 	roll = approx_atan2f(acc_Y, acc_Z)*(180/M_PI);
-	pitch = approx_atan2f(acc_X, approx_sqrtf(acc_Y*acc_Y + acc_Z*acc_Z))*(180/M_PI);
+	//pitch = approx_atan2f(acc_X, approx_sqrtf(acc_Y*acc_Y + acc_Z*acc_Z))*(180/M_PI);
 #if 0	
 	roll = atan2(ay, az)*180/M_PI;
-	pitch = atan2(ax, sqrt(ay*ay + az*az))*180/M_PI;
+	//pitch = atan2(ax, sqrt(ay*ay + az*az))*180/M_PI;
 #endif
 }
 
