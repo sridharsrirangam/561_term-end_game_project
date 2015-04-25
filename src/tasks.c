@@ -22,7 +22,6 @@ int16_t coin_X_pos=100;
 int16_t coin_Y_pos=100;
 int16_t score=0;
 int16_t life=3;
-float roll=0.0;
 
 void Init_Debug_Signals(void) {
 	// Enable clock to port B
@@ -112,15 +111,14 @@ __task void Task_Read_TS(void) {
 
 __task void Task_Read_Accelerometer(void) {
 	char buffer[16];
-	//float rollVal;
 	
 	os_itv_set(TASK_READ_ACCELEROMETER_PERIOD_TICKS);
 
 	while (1) {
 		os_itv_wait();
 		PTB->PSOR = MASK(DEBUG_T0_POS);
-		roll = read_full_xyz();
-		//tsk_roll = convert_xyz_to_roll_pitch();
+		read_full_xyz();
+		convert_xyz_to_roll_pitch();
 
 #if 0
 		sprintf(buffer, "Score: %d", score);
@@ -134,7 +132,7 @@ __task void Task_Read_Accelerometer(void) {
 		os_mut_release(&LCD_mutex);
 #endif
 		
-		sprintf(buffer, "Roll: %f", roll);
+		sprintf(buffer, "Roll: %6.2f", roll);
 		os_mut_wait(&LCD_mutex, WAIT_FOREVER);
 		TFT_Text_PrintStr_RC(2, 0, buffer);
 		os_mut_release(&LCD_mutex);
@@ -150,14 +148,31 @@ __task void Task_Update_Screen(void) {
 	int16_t paddle_pos=TFT_WIDTH/2;
 	//int16_t coin_pos=100;
 	PT_T p1, p2,c1,c2,d1;
-	COLOR_T paddle_color, black;
+	COLOR_T paddle_color, black,coin_color;
+	char buffer[16];
+	int i,j;
+	int8_t array_number [10][10] = {0,0,0,0,1,1,0,0,0,0,
+																	0,0,0,1,1,1,1,0,0,0,
+																	0,0,1,1,1,1,1,1,0,0,
+																	0,1,1,1,1,1,1,1,1,0,
+																	1,1,1,1,1,1,1,1,1,1,
+																	1,1,1,1,1,1,1,1,1,1,
+																	0,1,1,1,1,1,1,1,1,0,
+																	0,0,1,1,1,1,1,1,0,0,
+																	0,0,0,1,1,1,1,0,0,0,
+																	0,0,0,0,1,1,0,0,0,0};
 	
+
+																	
 	d1.X=150;
 	d1.Y=150;
 	paddle_color.R = 100;
 	paddle_color.G = 200;
 	paddle_color.B = 50;
-
+  
+	coin_color.R = 200;
+	coin_color.G= 50;
+	coin_color.B = 50;
 	black.R = 0;
 	black.G = 0;
 	black.B = 0;
@@ -210,9 +225,20 @@ __task void Task_Update_Screen(void) {
 			
 					coin_X_pos=(rand()) % 230;
 				}
-			TFT_Fill_Rectangle(&c1,&c2,&paddle_color);
+	//		TFT_Fill_Rectangle(&c1,&c2,&paddle_color);
 		//  TFT_Plot_Pixel(&d1,&paddle_color);
 		
+				for(i=0;i<10;i++)
+				{
+					for(j=0;j<10;j++)
+					{ d1.X =c1.X + i;
+						d1.Y = c1.Y +j;
+						if(array_number[i][j]==1)
+						TFT_Plot_Pixel(&d1,&coin_color);
+						else
+						TFT_Plot_Pixel(&d1,&black);
+				}
+			}
 		PTB->PCOR = MASK(DEBUG_T3_POS);
 	}
 }

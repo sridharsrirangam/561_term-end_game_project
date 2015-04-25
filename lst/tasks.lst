@@ -9386,7 +9386,6 @@ Nint16_t coin_X_pos=100;
 Nint16_t coin_Y_pos=100;
 Nint16_t score=0;
 Nint16_t life=3;
-Nfloat roll=0.0;
 N
 Nvoid Init_Debug_Signals(void) {
 N	// Enable clock to port B
@@ -9510,7 +9509,6 @@ N
 N__task void Task_Read_Accelerometer(void) {
 X__declspec(noreturn) void Task_Read_Accelerometer(void) {
 N	char buffer[16];
-N	//float rollVal;
 N	
 N	os_itv_set(TASK_READ_ACCELEROMETER_PERIOD_TICKS);
 X	_os_itv_set((U32)rt_itv_set,(100));
@@ -9520,8 +9518,9 @@ N		os_itv_wait();
 X		_os_itv_wait((U32)rt_itv_wait);
 N		PTB->PSOR = MASK(DEBUG_T0_POS);
 X		((GPIO_Type *)(0x400FF040u))->PSOR = (1UL << (0));
-N		roll = read_full_xyz();
-N		//tsk_roll = convert_xyz_to_roll_pitch();
+N		read_full_xyz();
+W "src\tasks.c" 120 3 function "convert_xyz_to_roll_pitch" declared implicitly
+N		convert_xyz_to_roll_pitch();
 N
 N#if 0
 S		sprintf(buffer, "Score: %d", score);
@@ -9535,7 +9534,8 @@ S		TFT_Text_PrintStr_RC(3, 0, buffer);
 S		os_mut_release(&LCD_mutex);
 N#endif
 N		
-N		sprintf(buffer, "Roll: %f", roll);
+E "src\tasks.c" 134 34 identifier "roll" is undefined
+N		sprintf(buffer, "Roll: %6.2f", roll);
 N		os_mut_wait(&LCD_mutex, WAIT_FOREVER);
 X		_os_mut_wait((U32)rt_mut_wait,&LCD_mutex,(0xffff));
 N		TFT_Text_PrintStr_RC(2, 0, buffer);
@@ -9556,14 +9556,31 @@ N	int16_t paddle_pos=TFT_WIDTH/2;
 X	int16_t paddle_pos=(240)/2;
 N	//int16_t coin_pos=100;
 N	PT_T p1, p2,c1,c2,d1;
-N	COLOR_T paddle_color, black;
+N	COLOR_T paddle_color, black,coin_color;
+N	char buffer[16];
+N	int i,j;
+N	int8_t array_number [10][10] = {0,0,0,0,1,1,0,0,0,0,
+N																	0,0,0,1,1,1,1,0,0,0,
+N																	0,0,1,1,1,1,1,1,0,0,
+N																	0,1,1,1,1,1,1,1,1,0,
+N																	1,1,1,1,1,1,1,1,1,1,
+N																	1,1,1,1,1,1,1,1,1,1,
+N																	0,1,1,1,1,1,1,1,1,0,
+N																	0,0,1,1,1,1,1,1,0,0,
+N																	0,0,0,1,1,1,1,0,0,0,
+N																	0,0,0,0,1,1,0,0,0,0};
 N	
+N
+N																	
 N	d1.X=150;
 N	d1.Y=150;
 N	paddle_color.R = 100;
 N	paddle_color.G = 200;
 N	paddle_color.B = 50;
-N
+N  
+N	coin_color.R = 200;
+N	coin_color.G= 50;
+N	coin_color.B = 50;
 N	black.R = 0;
 N	black.G = 0;
 N	black.B = 0;
@@ -9577,6 +9594,7 @@ X		_os_itv_wait((U32)rt_itv_wait);
 N		PTB->PSOR = MASK(DEBUG_T3_POS);
 X		((GPIO_Type *)(0x400FF040u))->PSOR = (1UL << (3));
 N		
+E "src\tasks.c" 185 8 identifier "roll" is undefined
 N		if ((roll < -2.0) || (roll > 2.0)) {
 N			p1.X = paddle_pos;
 N			p1.Y = PADDLE_Y_POS;
@@ -9630,14 +9648,33 @@ N				while(1);
 N			}
 N					coin_Y_pos=100;
 N			
+<<<<<<< Updated upstream
 W "src\tasks.c" 211 18 function "rand" declared implicitly
+=======
+W "src\tasks.c" 225 18 function "rand" declared implicitly
+>>>>>>> Stashed changes
 N					coin_X_pos=(rand()) % 230;
 N				}
-N			TFT_Fill_Rectangle(&c1,&c2,&paddle_color);
+N	//		TFT_Fill_Rectangle(&c1,&c2,&paddle_color);
 N		//  TFT_Plot_Pixel(&d1,&paddle_color);
 N		
+N				for(i=0;i<10;i++)
+N				{
+N					for(j=0;j<10;j++)
+N					{ d1.X =c1.X + i;
+N						d1.Y = c1.Y +j;
+N						if(array_number[i][j]==1)
+N						TFT_Plot_Pixel(&d1,&coin_color);
+N						else
+N						TFT_Plot_Pixel(&d1,&black);
+N				}
+N			}
 N		PTB->PCOR = MASK(DEBUG_T3_POS);
 X		((GPIO_Type *)(0x400FF040u))->PCOR = (1UL << (3));
 N	}
+<<<<<<< Updated upstream
 W "src\tasks.c" 152 20 variable "d1" was set but never used
+=======
+W "src\tasks.c" 151 7 variable "buffer" was declared but never referenced
+>>>>>>> Stashed changes
 N}
