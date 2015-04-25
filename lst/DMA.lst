@@ -8203,7 +8203,10 @@ N// Game Constants
 N#define PADDLE_WIDTH (40)
 N#define PADDLE_HEIGHT (15)
 N#define PADDLE_Y_POS (TFT_HEIGHT-4-PADDLE_HEIGHT)
-N 
+N
+N// constants for coin dimensions
+N#define COIN_RADIUS (10)
+N
 N#endif // TASKS_H
 L 8 "src\DMA.c" 2
 N

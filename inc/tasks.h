@@ -37,5 +37,8 @@ extern OS_TID t_Read_TS, t_Read_Accelerometer, t_Sound_Manager, t_US, t_Refill_S
 #define PADDLE_WIDTH (40)
 #define PADDLE_HEIGHT (15)
 #define PADDLE_Y_POS (TFT_HEIGHT-4-PADDLE_HEIGHT)
- 
+
+// constants for coin dimensions
+#define COIN_RADIUS (10)
+
 #endif // TASKS_H

@@ -18,6 +18,8 @@ OS_TID t_Read_TS, t_Read_Accelerometer, t_Sound_Manager, t_US, t_Refill_Sound_Bu
 OS_MUT LCD_mutex;
 OS_MUT TS_mutex;
 
+int16_t coin_X_pos=100;
+int16_t coin_Y_pos=100;
 void Init_Debug_Signals(void) {
 	// Enable clock to port B
 	SIM->SCGC5 |= SIM_SCGC5_PORTB_MASK;
@@ -133,9 +135,12 @@ __task void Task_Read_Accelerometer(void) {
 
 __task void Task_Update_Screen(void) {
 	int16_t paddle_pos=TFT_WIDTH/2;
-	PT_T p1, p2;
+	//int16_t coin_pos=100;
+	PT_T p1, p2,c1,c2,d1;
 	COLOR_T paddle_color, black;
 	
+	d1.X=150;
+	d1.Y=150;
 	paddle_color.R = 100;
 	paddle_color.G = 200;
 	paddle_color.B = 50;
@@ -165,8 +170,22 @@ __task void Task_Update_Screen(void) {
 			p1.Y = PADDLE_Y_POS;
 			p2.X = p1.X + PADDLE_WIDTH;
 			p2.Y = p1.Y + PADDLE_HEIGHT;
-			TFT_Fill_Rectangle(&p1, &p2, &paddle_color); 		
-		}
+			TFT_Fill_Rectangle(&p1, &p2, &paddle_color); 	
+		}		
+			TFT_Fill_Rectangle(&c1, &c2, &black);
+		
+			c1.X = coin_X_pos;
+			c1.Y=coin_Y_pos;
+			c2.X= coin_X_pos+COIN_RADIUS;
+			c2.Y= coin_Y_pos+COIN_RADIUS;
+			if(coin_Y_pos<300)
+			coin_Y_pos=coin_Y_pos+5;
+				if(coin_Y_pos>=300)
+				{coin_Y_pos=100;
+					coin_X_pos=rand()%240;
+				}
+			TFT_Fill_Rectangle(&c1,&c2,&paddle_color);
+		  TFT_Plot_Pixel(&d1,&paddle_color);
 		
 		PTB->PCOR = MASK(DEBUG_T3_POS);
 	}

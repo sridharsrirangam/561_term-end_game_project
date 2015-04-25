@@ -9261,7 +9261,10 @@ N// Game Constants
 N#define PADDLE_WIDTH (40)
 N#define PADDLE_HEIGHT (15)
 N#define PADDLE_Y_POS (TFT_HEIGHT-4-PADDLE_HEIGHT)
-N 
+N
+N// constants for coin dimensions
+N#define COIN_RADIUS (10)
+N
 N#endif // TASKS_H
 L 9 "src\tasks.c" 2
 N#include "MMA8451.h"
@@ -9379,6 +9382,8 @@ NOS_TID t_Read_TS, t_Read_Accelerometer, t_Sound_Manager, t_US, t_Refill_Sound_B
 NOS_MUT LCD_mutex;
 NOS_MUT TS_mutex;
 N
+Nint16_t coin_X_pos=100;
+Nint16_t coin_Y_pos=100;
 Nvoid Init_Debug_Signals(void) {
 N	// Enable clock to port B
 N	SIM->SCGC5 |= SIM_SCGC5_PORTB_MASK;
@@ -9540,9 +9545,12 @@ N__task void Task_Update_Screen(void) {
 X__declspec(noreturn) void Task_Update_Screen(void) {
 N	int16_t paddle_pos=TFT_WIDTH/2;
 X	int16_t paddle_pos=(240)/2;
-N	PT_T p1, p2;
+N	//int16_t coin_pos=100;
+N	PT_T p1, p2,c1,c2,d1;
 N	COLOR_T paddle_color, black;
 N	
+N	d1.X=150;
+N	d1.Y=150;
 N	paddle_color.R = 100;
 N	paddle_color.G = 200;
 N	paddle_color.B = 50;
@@ -9583,8 +9591,25 @@ N			p2.X = p1.X + PADDLE_WIDTH;
 X			p2.X = p1.X + (40);
 N			p2.Y = p1.Y + PADDLE_HEIGHT;
 X			p2.Y = p1.Y + (15);
-N			TFT_Fill_Rectangle(&p1, &p2, &paddle_color); 		
-N		}
+N			TFT_Fill_Rectangle(&p1, &p2, &paddle_color); 	
+N		}		
+N			TFT_Fill_Rectangle(&c1, &c2, &black);
+N		
+N			c1.X = coin_X_pos;
+N			c1.Y=coin_Y_pos;
+N			c2.X= coin_X_pos+COIN_RADIUS;
+X			c2.X= coin_X_pos+(10);
+N			c2.Y= coin_Y_pos+COIN_RADIUS;
+X			c2.Y= coin_Y_pos+(10);
+N			if(coin_Y_pos<300)
+N			coin_Y_pos=coin_Y_pos+5;
+N				if(coin_Y_pos>=300)
+N				{coin_Y_pos=100;
+W "src\tasks.c" 185 17 function "rand" declared implicitly
+N					coin_X_pos=rand()%240;
+N				}
+N			TFT_Fill_Rectangle(&c1,&c2,&paddle_color);
+N		  TFT_Plot_Pixel(&d1,&paddle_color);
 N		
 N		PTB->PCOR = MASK(DEBUG_T3_POS);
 X		((GPIO_Type *)(0x400FF040u))->PCOR = (1UL << (3));
