@@ -7301,11 +7301,11 @@ N#define COUNTS_PER_G (16384.0)
 N#define M_PI (3.14159265)
 N
 Nint init_mma(void);
-Nvoid read_full_xyz(void);
+Nfloat read_full_xyz(void);
 Nvoid read_xyz(void);
-Nvoid convert_xyz_to_roll_pitch(void);
+N//float convert_xyz_to_roll_pitch(void);
 N
-Nextern float roll;
+N//extern float roll;
 Nextern int16_t acc_X, acc_Y, acc_Z;
 N
 N#endif
@@ -8829,8 +8829,7 @@ Svolatile float acc, app, error;
 Svolatile float x, y;
 N#endif
 N
-Nint16_t acc_X=0, acc_Y=0, acc_Z=0;
-Nfloat roll=0.0;
+N
 N
 N//mma data ready
 Nextern uint32_t DATA_READY;
@@ -8863,44 +8862,18 @@ N		return 0;
 N	
 N}
 N
-N/* 
-N  Reads full 16-bit X, Y, Z accelerations.
-N*/
-Nvoid read_full_xyz()
-N{
-N	
-N	int i;
-N	uint8_t data[6];
-N	
-N	i2c_start();
-N	i2c_read_setup(MMA_ADDR , REG_XHI);
-X	i2c_read_setup(0x3A , 0x01);
-N	
-N	for( i=0;i<6;i++)	{
-N		if(i==5)
-N			data[i] = i2c_repeated_read(1);
-N		else
-N			data[i] = i2c_repeated_read(0);
-N	}
-N	
-N	acc_X = (((int16_t) data[0])<<8) | data[1];
-N	acc_Y = (((int16_t) data[2])<<8) | data[3];
-N	acc_Z = (((int16_t) data[4])<<8) | data[5];
-N}
-N
 N
 Nvoid read_xyz(void)
 N{
-N	// sign extend byte to 16 bits - need to cast to signed since function
-N	// returns uint8_t which is unsigned
-N	acc_X = ((int16_t) ((int8_t) i2c_read_byte(MMA_ADDR, REG_XHI))) << 8;
-X	acc_X = ((int16_t) ((int8_t) i2c_read_byte(0x3A, 0x01))) << 8;
-N	Delay(100);
-N	acc_Y = ((int16_t) ((int8_t) i2c_read_byte(MMA_ADDR, REG_YHI))) << 8;
-X	acc_Y = ((int16_t) ((int8_t) i2c_read_byte(0x3A, 0x03))) << 8;
-N	Delay(100);
-N	acc_Z = ((int16_t) ((int8_t) i2c_read_byte(MMA_ADDR, REG_ZHI))) << 8;
-X	acc_Z = ((int16_t) ((int8_t) i2c_read_byte(0x3A, 0x05))) << 8;
+N#if 0
+S	// sign extend byte to 16 bits - need to cast to signed since function
+S	// returns uint8_t which is unsigned
+S	acc_X = ((int16_t) ((int8_t) i2c_read_byte(MMA_ADDR, REG_XHI))) << 8;
+S	Delay(100);
+S	acc_Y = ((int16_t) ((int8_t) i2c_read_byte(MMA_ADDR, REG_YHI))) << 8;
+S	Delay(100);
+S	acc_Z = ((int16_t) ((int8_t) i2c_read_byte(MMA_ADDR, REG_ZHI))) << 8;
+N#endif
 N}
 N
 Nfloat approx_sqrtf(float z) { // from Wikipedia
@@ -8963,19 +8936,56 @@ X			return approx - (3.14159265);
 N	}		
 N}
 N
-Nvoid convert_xyz_to_roll_pitch(void) {
-N/*
-N	float ax = acc_X/COUNTS_PER_G,
-N				ay = acc_Y/COUNTS_PER_G,
-N				az = acc_Z/COUNTS_PER_G;
+N
+N/* 
+N  Reads full 16-bit X, Y, Z accelerations.
 N*/
+Nfloat read_full_xyz()
+N{
+N	// Made these local variables
+N  int16_t acc_X, acc_Y, acc_Z;
+N  float roll;
+N	
+N	int i;
+N	uint8_t data[6];
+N	
+N	i2c_start();
+N	i2c_read_setup(MMA_ADDR , REG_XHI);
+X	i2c_read_setup(0x3A , 0x01);
+N	
+N	for( i=0;i<6;i++)	{
+N		if(i==5)
+N			data[i] = i2c_repeated_read(1);
+N		else
+N			data[i] = i2c_repeated_read(0);
+N	}
+N	
+N	acc_X = (((int16_t) data[0])<<8) | data[1];
+N	acc_Y = (((int16_t) data[2])<<8) | data[3];
+N	acc_Z = (((int16_t) data[4])<<8) | data[5];
 N	
 N	roll = approx_atan2f(acc_Y, acc_Z)*(180/M_PI);
 X	roll = approx_atan2f(acc_Y, acc_Z)*(180/(3.14159265));
-N	//pitch = approx_atan2f(acc_X, approx_sqrtf(acc_Y*acc_Y + acc_Z*acc_Z))*(180/M_PI);
-N#if 0	
-S	roll = atan2(ay, az)*180/M_PI;
-S	//pitch = atan2(ax, sqrt(ay*ay + az*az))*180/M_PI;
-N#endif
+N	
+N	return roll;
+W "src\MMA8451.c" 120 11 variable "acc_X" was set but never used
 N}
 N
+N//--------------------
+N#if 0
+Sfloat convert_xyz_to_roll_pitch(void) {
+S/*
+S	float ax = acc_X/COUNTS_PER_G,
+S				ay = acc_Y/COUNTS_PER_G,
+S				az = acc_Z/COUNTS_PER_G;
+S*/
+S	
+S	roll = approx_atan2f(acc_Y, acc_Z)*(180/M_PI);
+S	//pitch = approx_atan2f(acc_X, approx_sqrtf(acc_Y*acc_Y + acc_Z*acc_Z))*(180/M_PI);
+S#if 0	
+S	roll = atan2(ay, az)*180/M_PI;
+S	//pitch = atan2(ax, sqrt(ay*ay + az*az))*180/M_PI;
+S#endif
+S	return roll;
+S}
+N#endif

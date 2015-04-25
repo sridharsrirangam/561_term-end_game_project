@@ -13,8 +13,7 @@ volatile float acc, app, error;
 volatile float x, y;
 #endif
 
-int16_t acc_X=0, acc_Y=0, acc_Z=0;
-float roll=0.0;
+
 
 //mma data ready
 extern uint32_t DATA_READY;
@@ -44,33 +43,10 @@ int init_mma()
 	
 }
 
-/* 
-  Reads full 16-bit X, Y, Z accelerations.
-*/
-void read_full_xyz()
-{
-	
-	int i;
-	uint8_t data[6];
-	
-	i2c_start();
-	i2c_read_setup(MMA_ADDR , REG_XHI);
-	
-	for( i=0;i<6;i++)	{
-		if(i==5)
-			data[i] = i2c_repeated_read(1);
-		else
-			data[i] = i2c_repeated_read(0);
-	}
-	
-	acc_X = (((int16_t) data[0])<<8) | data[1];
-	acc_Y = (((int16_t) data[2])<<8) | data[3];
-	acc_Z = (((int16_t) data[4])<<8) | data[5];
-}
-
 
 void read_xyz(void)
 {
+#if 0
 	// sign extend byte to 16 bits - need to cast to signed since function
 	// returns uint8_t which is unsigned
 	acc_X = ((int16_t) ((int8_t) i2c_read_byte(MMA_ADDR, REG_XHI))) << 8;
@@ -78,6 +54,7 @@ void read_xyz(void)
 	acc_Y = ((int16_t) ((int8_t) i2c_read_byte(MMA_ADDR, REG_YHI))) << 8;
 	Delay(100);
 	acc_Z = ((int16_t) ((int8_t) i2c_read_byte(MMA_ADDR, REG_ZHI))) << 8;
+#endif
 }
 
 float approx_sqrtf(float z) { // from Wikipedia
@@ -133,7 +110,41 @@ float approx_atan2f(float y, float x) {
 	}		
 }
 
-void convert_xyz_to_roll_pitch(void) {
+
+/* 
+  Reads full 16-bit X, Y, Z accelerations.
+*/
+float read_full_xyz()
+{
+	// Made these local variables
+  int16_t acc_X, acc_Y, acc_Z;
+  float roll;
+	
+	int i;
+	uint8_t data[6];
+	
+	i2c_start();
+	i2c_read_setup(MMA_ADDR , REG_XHI);
+	
+	for( i=0;i<6;i++)	{
+		if(i==5)
+			data[i] = i2c_repeated_read(1);
+		else
+			data[i] = i2c_repeated_read(0);
+	}
+	
+	acc_X = (((int16_t) data[0])<<8) | data[1];
+	acc_Y = (((int16_t) data[2])<<8) | data[3];
+	acc_Z = (((int16_t) data[4])<<8) | data[5];
+	
+	roll = approx_atan2f(acc_Y, acc_Z)*(180/M_PI);
+	
+	return roll;
+}
+
+//--------------------
+#if 0
+float convert_xyz_to_roll_pitch(void) {
 /*
 	float ax = acc_X/COUNTS_PER_G,
 				ay = acc_Y/COUNTS_PER_G,
@@ -146,5 +157,6 @@ void convert_xyz_to_roll_pitch(void) {
 	roll = atan2(ay, az)*180/M_PI;
 	//pitch = atan2(ax, sqrt(ay*ay + az*az))*180/M_PI;
 #endif
+	return roll;
 }
-
+#endif

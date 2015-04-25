@@ -22,6 +22,7 @@ int16_t coin_X_pos=100;
 int16_t coin_Y_pos=100;
 int16_t score=0;
 int16_t life=3;
+float roll=0.0;
 
 void Init_Debug_Signals(void) {
 	// Enable clock to port B
@@ -110,14 +111,15 @@ __task void Task_Read_TS(void) {
 
 __task void Task_Read_Accelerometer(void) {
 	char buffer[16];
+	//float rollVal;
 	
 	os_itv_set(TASK_READ_ACCELEROMETER_PERIOD_TICKS);
 
 	while (1) {
 		os_itv_wait();
 		PTB->PSOR = MASK(DEBUG_T0_POS);
-		read_full_xyz();
-		convert_xyz_to_roll_pitch();
+		roll = read_full_xyz();
+		//tsk_roll = convert_xyz_to_roll_pitch();
 
 #if 0
 		sprintf(buffer, "Score: %d", score);
@@ -131,7 +133,7 @@ __task void Task_Read_Accelerometer(void) {
 		os_mut_release(&LCD_mutex);
 #endif
 		
-		sprintf(buffer, "Roll: %d", roll);
+		sprintf(buffer, "Roll: %f", roll);
 		os_mut_wait(&LCD_mutex, WAIT_FOREVER);
 		TFT_Text_PrintStr_RC(2, 0, buffer);
 		os_mut_release(&LCD_mutex);

@@ -9394,11 +9394,11 @@ N#define COUNTS_PER_G (16384.0)
 N#define M_PI (3.14159265)
 N
 Nint init_mma(void);
-Nvoid read_full_xyz(void);
+Nfloat read_full_xyz(void);
 Nvoid read_xyz(void);
-Nvoid convert_xyz_to_roll_pitch(void);
+N//float convert_xyz_to_roll_pitch(void);
 N
-Nextern float roll;
+N//extern float roll;
 Nextern int16_t acc_X, acc_Y, acc_Z;
 N
 N#endif

@@ -20,11 +20,11 @@
 #define M_PI (3.14159265)
 
 int init_mma(void);
-void read_full_xyz(void);
+float read_full_xyz(void);
 void read_xyz(void);
-void convert_xyz_to_roll_pitch(void);
+//float convert_xyz_to_roll_pitch(void);
 
-extern float roll;
+//extern float roll;
 extern int16_t acc_X, acc_Y, acc_Z;
 
 #endif
