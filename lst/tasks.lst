@@ -9384,6 +9384,8 @@ NOS_MUT TS_mutex;
 N
 Nint16_t coin_X_pos=100;
 Nint16_t coin_Y_pos=100;
+Nint16_t score=0;
+Nint16_t life=3;
 Nvoid Init_Debug_Signals(void) {
 N	// Enable clock to port B
 N	SIM->SCGC5 |= SIM_SCGC5_PORTB_MASK;
@@ -9462,11 +9464,9 @@ N
 N	os_itv_set(TASK_READ_TS_PERIOD_TICKS);
 X	_os_itv_set((U32)rt_itv_set,(20));
 N
-N	TFT_Text_PrintStr_RC(TFT_MAX_ROWS-3, 0, "Mute");
-X	TFT_Text_PrintStr_RC(((320)/G_TFT_char_height)-3, 0, "Mute");
+N/*	TFT_Text_PrintStr_RC(TFT_MAX_ROWS-3, 0, "Mute");
 N	TFT_Text_PrintStr_RC(TFT_MAX_ROWS-3, 12, "Unmute");
-X	TFT_Text_PrintStr_RC(((320)/G_TFT_char_height)-3, 12, "Unmute");
-N	
+N	*/
 N	while (1) {
 N		os_itv_wait();
 X		_os_itv_wait((U32)rt_itv_wait);
@@ -9519,14 +9519,14 @@ X		((GPIO_Type *)(0x400FF040u))->PSOR = (1UL << (0));
 N		read_full_xyz();
 N		convert_xyz_to_roll_pitch();
 N
-N		sprintf(buffer, "Roll: %6.2f", roll);
+N		sprintf(buffer, "Score: %d", score);
 N		os_mut_wait(&LCD_mutex, WAIT_FOREVER);
 X		_os_mut_wait((U32)rt_mut_wait,&LCD_mutex,(0xffff));
 N		TFT_Text_PrintStr_RC(2, 0, buffer);
 N		os_mut_release(&LCD_mutex);
 X		_os_mut_release((U32)rt_mut_release,&LCD_mutex);
 N
-N		sprintf(buffer, "Pitch: %6.2f", pitch);
+N		sprintf(buffer, "Life: %d", life);
 N		os_mut_wait(&LCD_mutex, WAIT_FOREVER);
 X		_os_mut_wait((U32)rt_mut_wait,&LCD_mutex,(0xffff));
 N		TFT_Text_PrintStr_RC(3, 0, buffer);
@@ -9603,15 +9603,32 @@ N			c2.Y= coin_Y_pos+COIN_RADIUS;
 X			c2.Y= coin_Y_pos+(10);
 N			if(coin_Y_pos<300)
 N			coin_Y_pos=coin_Y_pos+5;
-N				if(coin_Y_pos>=300)
-N				{coin_Y_pos=100;
-W "src\tasks.c" 185 17 function "rand" declared implicitly
+N				
+N			if(coin_Y_pos>=300)
+N				{ 
+N					if((coin_X_pos>paddle_pos)&&(coin_X_pos<paddle_pos+PADDLE_WIDTH))
+X					if((coin_X_pos>paddle_pos)&&(coin_X_pos<paddle_pos+(40)))
+N						score+=1;
+N					else
+N						life=life-1;
+N			if(life <0 )
+N			{
+N				TFT_Text_PrintStr_RC(TFT_MAX_ROWS-4, 4, "Game Over");
+X				TFT_Text_PrintStr_RC(((320)/G_TFT_char_height)-4, 4, "Game Over");
+N				TFT_Text_PrintStr_RC(TFT_MAX_ROWS-3, 4, "Press Reset");
+X				TFT_Text_PrintStr_RC(((320)/G_TFT_char_height)-3, 4, "Press Reset");
+N				while(1);
+N			}
+N					coin_Y_pos=100;
+N			
+W "src\tasks.c" 200 17 function "rand" declared implicitly
 N					coin_X_pos=rand()%240;
 N				}
 N			TFT_Fill_Rectangle(&c1,&c2,&paddle_color);
-N		  TFT_Plot_Pixel(&d1,&paddle_color);
+N		//  TFT_Plot_Pixel(&d1,&paddle_color);
 N		
 N		PTB->PCOR = MASK(DEBUG_T3_POS);
 X		((GPIO_Type *)(0x400FF040u))->PCOR = (1UL << (3));
 N	}
+W "src\tasks.c" 141 20 variable "d1" was set but never used
 N}

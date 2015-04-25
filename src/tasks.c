@@ -20,6 +20,8 @@ OS_MUT TS_mutex;
 
 int16_t coin_X_pos=100;
 int16_t coin_Y_pos=100;
+int16_t score=0;
+int16_t life=3;
 void Init_Debug_Signals(void) {
 	// Enable clock to port B
 	SIM->SCGC5 |= SIM_SCGC5_PORTB_MASK;
@@ -71,9 +73,9 @@ __task void Task_Read_TS(void) {
 	
 	os_itv_set(TASK_READ_TS_PERIOD_TICKS);
 
-	TFT_Text_PrintStr_RC(TFT_MAX_ROWS-3, 0, "Mute");
+/*	TFT_Text_PrintStr_RC(TFT_MAX_ROWS-3, 0, "Mute");
 	TFT_Text_PrintStr_RC(TFT_MAX_ROWS-3, 12, "Unmute");
-	
+	*/
 	while (1) {
 		os_itv_wait();
 		PTB->PSOR = MASK(DEBUG_T1_POS);
@@ -116,12 +118,12 @@ __task void Task_Read_Accelerometer(void) {
 		read_full_xyz();
 		convert_xyz_to_roll_pitch();
 
-		sprintf(buffer, "Roll: %6.2f", roll);
+		sprintf(buffer, "Score: %d", score);
 		os_mut_wait(&LCD_mutex, WAIT_FOREVER);
 		TFT_Text_PrintStr_RC(2, 0, buffer);
 		os_mut_release(&LCD_mutex);
 
-		sprintf(buffer, "Pitch: %6.2f", pitch);
+		sprintf(buffer, "Life: %d", life);
 		os_mut_wait(&LCD_mutex, WAIT_FOREVER);
 		TFT_Text_PrintStr_RC(3, 0, buffer);
 		os_mut_release(&LCD_mutex);
@@ -180,12 +182,25 @@ __task void Task_Update_Screen(void) {
 			c2.Y= coin_Y_pos+COIN_RADIUS;
 			if(coin_Y_pos<300)
 			coin_Y_pos=coin_Y_pos+5;
-				if(coin_Y_pos>=300)
-				{coin_Y_pos=100;
+				
+			if(coin_Y_pos>=300)
+				{ 
+					if((coin_X_pos>paddle_pos)&&(coin_X_pos<paddle_pos+PADDLE_WIDTH))
+						score+=1;
+					else
+						life=life-1;
+			if(life <0 )
+			{
+				TFT_Text_PrintStr_RC(TFT_MAX_ROWS-4, 4, "Game Over");
+				TFT_Text_PrintStr_RC(TFT_MAX_ROWS-3, 4, "Press Reset");
+				while(1);
+			}
+					coin_Y_pos=100;
+			
 					coin_X_pos=rand()%240;
 				}
 			TFT_Fill_Rectangle(&c1,&c2,&paddle_color);
-		  TFT_Plot_Pixel(&d1,&paddle_color);
+		//  TFT_Plot_Pixel(&d1,&paddle_color);
 		
 		PTB->PCOR = MASK(DEBUG_T3_POS);
 	}
