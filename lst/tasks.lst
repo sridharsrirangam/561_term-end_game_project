@@ -9381,11 +9381,14 @@ N
 NOS_TID t_Read_TS, t_Read_Accelerometer, t_Sound_Manager, t_US, t_Refill_Sound_Buffer;
 NOS_MUT LCD_mutex;
 NOS_MUT TS_mutex;
+NOS_MBX ACCL_mailbox;
 N
 Nint16_t coin_X_pos=100;
 Nint16_t coin_Y_pos=100;
 Nint16_t score=0;
 Nint16_t life=3;
+Nfloat roll=0.0;
+Nint ret_val=0;
 N
 Nvoid Init_Debug_Signals(void) {
 N	// Enable clock to port B
@@ -9434,13 +9437,18 @@ N
 N__task void Task_Init(void) {
 X__declspec(noreturn) void Task_Init(void) {
 N	
+N	os_mbx_declare(ACCL_mailbox,1);
+X	U32 ACCL_mailbox [4 + 1];
+N	
 N	os_mut_init(&LCD_mutex);
 X	_os_mut_init((U32)rt_mut_init,&LCD_mutex);
+N	os_mbx_init(&ACCL_mailbox,sizeof(float)*1); // number of elements being sent.
+X	_os_mbx_init((U32)rt_mbx_init,&ACCL_mailbox,sizeof(float)*1); 
 N	
 N	t_Read_TS = os_tsk_create(Task_Read_TS, 4);
 X	t_Read_TS = _os_tsk_create((U32)rt_tsk_create,Task_Read_TS,4,0,0);
-N	t_Read_Accelerometer = os_tsk_create_user(Task_Read_Accelerometer, 3, RA_Stack, 512);
-X	t_Read_Accelerometer = _os_tsk_create((U32)rt_tsk_create,Task_Read_Accelerometer,3|(512<<8),RA_Stack,0);
+N	t_Read_Accelerometer = os_tsk_create_user(Task_Read_Accelerometer, 5, RA_Stack, 512);
+X	t_Read_Accelerometer = _os_tsk_create((U32)rt_tsk_create,Task_Read_Accelerometer,5|(512<<8),RA_Stack,0);
 N	t_Sound_Manager = os_tsk_create(Task_Sound_Manager, 2);
 X	t_Sound_Manager = _os_tsk_create((U32)rt_tsk_create,Task_Sound_Manager,2,0,0);
 N	t_US = os_tsk_create(Task_Update_Screen, 5);
@@ -9509,6 +9517,10 @@ N__task void Task_Read_Accelerometer(void) {
 X__declspec(noreturn) void Task_Read_Accelerometer(void) {
 N	char buffer[16];
 N	
+N	//buffer to send data using a mailbox
+N	float mbx_buf[1];
+N	
+N	
 N	os_itv_set(TASK_READ_ACCELEROMETER_PERIOD_TICKS);
 X	_os_itv_set((U32)rt_itv_set,(100));
 N
@@ -9517,9 +9529,24 @@ N		os_itv_wait();
 X		_os_itv_wait((U32)rt_itv_wait);
 N		PTB->PSOR = MASK(DEBUG_T0_POS);
 X		((GPIO_Type *)(0x400FF040u))->PSOR = (1UL << (0));
-N		read_full_xyz();
-W "src\tasks.c" 120 3 function "convert_xyz_to_roll_pitch" declared implicitly
-N		convert_xyz_to_roll_pitch();
+N		//roll = read_full_xyz();
+N		mbx_buf[0] = read_full_xyz();
+N		
+N		// send with maximum timeout less than infinity
+N		if((ret_val=os_mbx_send(&ACCL_mailbox,&mbx_buf,0xFFFE)) != OS_R_OK)
+X		if((ret_val=_os_mbx_send((U32)rt_mbx_send,&ACCL_mailbox,&mbx_buf,0xFFFE)) != 0x00)
+N		{
+N			sprintf(buffer, "Error in MBX Send!!");
+N			os_mut_wait(&LCD_mutex, WAIT_FOREVER);
+X			_os_mut_wait((U32)rt_mut_wait,&LCD_mutex,(0xffff));
+N			TFT_Text_PrintStr_RC(TFT_MAX_ROWS-5, 3, buffer);
+X			TFT_Text_PrintStr_RC(((320)/G_TFT_char_height)-5, 3, buffer);
+N			os_mut_release(&LCD_mutex);
+X			_os_mut_release((U32)rt_mut_release,&LCD_mutex);
+N			while(1); // only for debugging
+N		}			
+N		
+N		//convert_xyz_to_roll_pitch();
 N
 N#if 0
 S		sprintf(buffer, "Score: %d", score);
@@ -9533,7 +9560,6 @@ S		TFT_Text_PrintStr_RC(3, 0, buffer);
 S		os_mut_release(&LCD_mutex);
 N#endif
 N		
-E "src\tasks.c" 134 34 identifier "roll" is undefined
 N		sprintf(buffer, "Roll: %6.2f", roll);
 N		os_mut_wait(&LCD_mutex, WAIT_FOREVER);
 X		_os_mut_wait((U32)rt_mut_wait,&LCD_mutex,(0xffff));
@@ -9558,6 +9584,10 @@ N	PT_T p1, p2,c1,c2,d1;
 N	COLOR_T paddle_color, black,coin_color;
 N	char buffer[16];
 N	int i,j;
+N	
+N	float *TUS_mbx_buf;
+N	float rollVal;
+N	
 N	int8_t array_number [10][10] = {0,0,0,0,1,1,0,0,0,0,
 N																	0,0,0,1,1,1,1,0,0,0,
 N																	0,0,1,1,1,1,1,1,0,0,
@@ -9590,10 +9620,26 @@ N
 N	while (1) {
 N		os_itv_wait();
 X		_os_itv_wait((U32)rt_itv_wait);
+N		//if(os_mbx_wait(&ACCL_mailbox,(void**)&TUS_mbx_buf,0x00FE) == OS_R_TMO)
+N		if(0)
+N		{
+N			sprintf(buffer, "Error in MBX Receive!!");
+N			os_mut_wait(&LCD_mutex, WAIT_FOREVER);
+X			_os_mut_wait((U32)rt_mut_wait,&LCD_mutex,(0xffff));
+N			TFT_Text_PrintStr_RC(TFT_MAX_ROWS - 5, TFT_MAX_COLS, buffer);
+X			TFT_Text_PrintStr_RC(((320)/G_TFT_char_height) - 5, ((240)/G_TFT_char_width), buffer);
+N			os_mut_release(&LCD_mutex);
+X			_os_mut_release((U32)rt_mut_release,&LCD_mutex);
+N			while(1); // only for debugging
+N		}
+N		
+N		//rollVal = *TUS_mbx_buf;
+N		
+N		roll = rollVal;
+N		
 N		PTB->PSOR = MASK(DEBUG_T3_POS);
 X		((GPIO_Type *)(0x400FF040u))->PSOR = (1UL << (3));
 N		
-E "src\tasks.c" 185 8 identifier "roll" is undefined
 N		if ((roll < -2.0) || (roll > 2.0)) {
 N			p1.X = paddle_pos;
 N			p1.Y = PADDLE_Y_POS;
@@ -9647,15 +9693,7 @@ N				while(1);
 N			}
 N					coin_Y_pos=100;
 N			
-<<<<<<< HEAD
-<<<<<<< Updated upstream
-W "src\tasks.c" 211 18 function "rand" declared implicitly
-=======
-W "src\tasks.c" 225 18 function "rand" declared implicitly
->>>>>>> Stashed changes
-=======
-W "src\tasks.c" 210 18 function "rand" declared implicitly
->>>>>>> parent of 7cdbdad... recommit to check errors
+W "src\tasks.c" 265 18 function "rand" declared implicitly
 N					coin_X_pos=(rand()) % 230;
 N				}
 N	//		TFT_Fill_Rectangle(&c1,&c2,&paddle_color);
@@ -9675,13 +9713,5 @@ N			}
 N		PTB->PCOR = MASK(DEBUG_T3_POS);
 X		((GPIO_Type *)(0x400FF040u))->PCOR = (1UL << (3));
 N	}
-<<<<<<< HEAD
-<<<<<<< Updated upstream
-W "src\tasks.c" 152 20 variable "d1" was set but never used
-=======
-W "src\tasks.c" 151 7 variable "buffer" was declared but never referenced
->>>>>>> Stashed changes
-=======
-W "src\tasks.c" 151 20 variable "d1" was set but never used
->>>>>>> parent of 7cdbdad... recommit to check errors
+W "src\tasks.c" 176 9 variable "TUS_mbx_buf" was declared but never referenced
 N}

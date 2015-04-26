@@ -17,11 +17,14 @@ U64 RA_Stack[64];
 OS_TID t_Read_TS, t_Read_Accelerometer, t_Sound_Manager, t_US, t_Refill_Sound_Buffer;
 OS_MUT LCD_mutex;
 OS_MUT TS_mutex;
+OS_MBX ACCL_mailbox;
 
 int16_t coin_X_pos=100;
 int16_t coin_Y_pos=100;
 int16_t score=0;
 int16_t life=3;
+float roll=0.0;
+int ret_val=0;
 
 void Init_Debug_Signals(void) {
 	// Enable clock to port B
@@ -52,10 +55,13 @@ void Init_Debug_Signals(void) {
 
 __task void Task_Init(void) {
 	
+	os_mbx_declare(ACCL_mailbox,1);
+	
 	os_mut_init(&LCD_mutex);
+	os_mbx_init(&ACCL_mailbox,sizeof(float)*1); // number of elements being sent.
 	
 	t_Read_TS = os_tsk_create(Task_Read_TS, 4);
-	t_Read_Accelerometer = os_tsk_create_user(Task_Read_Accelerometer, 3, RA_Stack, 512);
+	t_Read_Accelerometer = os_tsk_create_user(Task_Read_Accelerometer, 5, RA_Stack, 512);
 	t_Sound_Manager = os_tsk_create(Task_Sound_Manager, 2);
 	t_US = os_tsk_create(Task_Update_Screen, 5);
 	t_Refill_Sound_Buffer = os_tsk_create(Task_Refill_Sound_Buffer, 1);
@@ -111,13 +117,29 @@ __task void Task_Read_TS(void) {
 __task void Task_Read_Accelerometer(void) {
 	char buffer[16];
 	
+	//buffer to send data using a mailbox
+	float mbx_buf[1];
+	
+	
 	os_itv_set(TASK_READ_ACCELEROMETER_PERIOD_TICKS);
 
 	while (1) {
 		os_itv_wait();
 		PTB->PSOR = MASK(DEBUG_T0_POS);
-		read_full_xyz();
-		convert_xyz_to_roll_pitch();
+		//roll = read_full_xyz();
+		mbx_buf[0] = read_full_xyz();
+		
+		// send with maximum timeout less than infinity
+		if((ret_val=os_mbx_send(&ACCL_mailbox,&mbx_buf,0xFFFE)) != OS_R_OK)
+		{
+			sprintf(buffer, "Error in MBX Send!!");
+			os_mut_wait(&LCD_mutex, WAIT_FOREVER);
+			TFT_Text_PrintStr_RC(TFT_MAX_ROWS-5, 3, buffer);
+			os_mut_release(&LCD_mutex);
+			while(1); // only for debugging
+		}			
+		
+		//convert_xyz_to_roll_pitch();
 
 #if 0
 		sprintf(buffer, "Score: %d", score);
@@ -150,6 +172,10 @@ __task void Task_Update_Screen(void) {
 	COLOR_T paddle_color, black,coin_color;
 	char buffer[16];
 	int i,j;
+	
+	float *TUS_mbx_buf;
+	float rollVal;
+	
 	int8_t array_number [10][10] = {0,0,0,0,1,1,0,0,0,0,
 																	0,0,0,1,1,1,1,0,0,0,
 																	0,0,1,1,1,1,1,1,0,0,
@@ -180,6 +206,20 @@ __task void Task_Update_Screen(void) {
 
 	while (1) {
 		os_itv_wait();
+		//if(os_mbx_wait(&ACCL_mailbox,(void**)&TUS_mbx_buf,0x00FE) == OS_R_TMO)
+		if(0)
+		{
+			sprintf(buffer, "Error in MBX Receive!!");
+			os_mut_wait(&LCD_mutex, WAIT_FOREVER);
+			TFT_Text_PrintStr_RC(TFT_MAX_ROWS - 5, TFT_MAX_COLS, buffer);
+			os_mut_release(&LCD_mutex);
+			while(1); // only for debugging
+		}
+		
+		//rollVal = *TUS_mbx_buf;
+		
+		roll = rollVal;
+		
 		PTB->PSOR = MASK(DEBUG_T3_POS);
 		
 		if ((roll < -2.0) || (roll > 2.0)) {

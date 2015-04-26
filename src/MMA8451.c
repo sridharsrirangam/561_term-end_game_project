@@ -116,8 +116,9 @@ float approx_atan2f(float y, float x) {
 */
 float read_full_xyz()
 {
+
 	// Made these local variables
-  int16_t acc_X, acc_Y, acc_Z;
+  int16_t acc_Y, acc_Z;
   float roll;
 	
 	int i;
@@ -133,7 +134,7 @@ float read_full_xyz()
 			data[i] = i2c_repeated_read(0);
 	}
 	
-	acc_X = (((int16_t) data[0])<<8) | data[1];
+	//acc_X = (((int16_t) data[0])<<8) | data[1];
 	acc_Y = (((int16_t) data[2])<<8) | data[3];
 	acc_Z = (((int16_t) data[4])<<8) | data[5];
 	
