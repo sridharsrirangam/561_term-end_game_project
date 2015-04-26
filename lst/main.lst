@@ -10930,6 +10930,8 @@ N __task void Task_Update_Screen(void);
 X __declspec(noreturn) void Task_Update_Screen(void);
 N __task void Task_GameStats(void);
 X __declspec(noreturn) void Task_GameStats(void);
+N __task void Task_CPUStats(void);
+X __declspec(noreturn) void Task_CPUStats(void);
 N 
 Nextern OS_TID t_Read_TS, t_Read_Accelerometer, t_Sound_Manager, t_US, t_Refill_Sound_Buffer;
 N

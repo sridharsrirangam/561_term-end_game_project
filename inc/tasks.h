@@ -30,6 +30,7 @@
  __task void Task_Read_Accelerometer(void);
  __task void Task_Update_Screen(void);
  __task void Task_GameStats(void);
+ __task void Task_CPUStats(void);
  
 extern OS_TID t_Read_TS, t_Read_Accelerometer, t_Sound_Manager, t_US, t_Refill_Sound_Buffer;
 
