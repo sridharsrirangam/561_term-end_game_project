@@ -53,7 +53,6 @@ void Init_Debug_Signals(void) {
 __task void Task_Init(void) {
 	
 	os_mut_init(&LCD_mutex);
-	//os_mbx_declare(&ACCL_mailbox,1);
 	
 	t_Read_TS = os_tsk_create(Task_Read_TS, 4);
 	t_Read_Accelerometer = os_tsk_create_user(Task_Read_Accelerometer, 3, RA_Stack, 512);
