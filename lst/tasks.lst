@@ -9253,6 +9253,8 @@ N __task void Task_Read_Accelerometer(void);
 X __declspec(noreturn) void Task_Read_Accelerometer(void);
 N __task void Task_Update_Screen(void);
 X __declspec(noreturn) void Task_Update_Screen(void);
+N __task void Task_GameStats(void);
+X __declspec(noreturn) void Task_GameStats(void);
 N 
 Nextern OS_TID t_Read_TS, t_Read_Accelerometer, t_Sound_Manager, t_US, t_Refill_Sound_Buffer;
 N
@@ -9264,6 +9266,10 @@ N#define PADDLE_Y_POS (TFT_HEIGHT-4-PADDLE_HEIGHT)
 N
 N// constants for coin dimensions
 N#define COIN_RADIUS (10)
+N
+N// Event Flags for Update Screen
+N#define EV_SCORE_UPDATE (uint16_t)(0x0001)
+N#define EV_LIFE_UPDATE (uint16_t)(0x0002)
 N
 N#endif // TASKS_H
 L 9 "src\tasks.c" 2
@@ -9378,17 +9384,22 @@ N
 N
 NU64 RA_Stack[64];
 N
-NOS_TID t_Read_TS, t_Read_Accelerometer, t_Sound_Manager, t_US, t_Refill_Sound_Buffer;
+NOS_TID t_Read_TS, t_Read_Accelerometer, t_Sound_Manager, t_US,
+N							t_Refill_Sound_Buffer, t_GameStats;
 NOS_MUT LCD_mutex;
 NOS_MUT TS_mutex;
 NOS_MBX ACCL_mailbox;
+Nos_mbx_declare(ACCL_mailbox,2);
+XU32 ACCL_mailbox [4 + 2];
 N
 Nint16_t coin_X_pos=100;
 Nint16_t coin_Y_pos=100;
+N/*
 Nint16_t score=0;
 Nint16_t life=3;
+N*/
 Nfloat roll=0.0;
-Nint ret_val=0;
+N
 N
 Nvoid Init_Debug_Signals(void) {
 N	// Enable clock to port B
@@ -9437,24 +9448,24 @@ N
 N__task void Task_Init(void) {
 X__declspec(noreturn) void Task_Init(void) {
 N	
-N	os_mbx_declare(ACCL_mailbox,1);
-X	U32 ACCL_mailbox [4 + 1];
+N	
 N	
 N	os_mut_init(&LCD_mutex);
 X	_os_mut_init((U32)rt_mut_init,&LCD_mutex);
-N	os_mbx_init(&ACCL_mailbox,sizeof(float)*1); // number of elements being sent.
-X	_os_mbx_init((U32)rt_mbx_init,&ACCL_mailbox,sizeof(float)*1); 
+N	
 N	
 N	t_Read_TS = os_tsk_create(Task_Read_TS, 4);
 X	t_Read_TS = _os_tsk_create((U32)rt_tsk_create,Task_Read_TS,4,0,0);
-N	t_Read_Accelerometer = os_tsk_create_user(Task_Read_Accelerometer, 5, RA_Stack, 512);
-X	t_Read_Accelerometer = _os_tsk_create((U32)rt_tsk_create,Task_Read_Accelerometer,5|(512<<8),RA_Stack,0);
+N	t_Read_Accelerometer = os_tsk_create_user(Task_Read_Accelerometer, 3, RA_Stack, 512);
+X	t_Read_Accelerometer = _os_tsk_create((U32)rt_tsk_create,Task_Read_Accelerometer,3|(512<<8),RA_Stack,0);
 N	t_Sound_Manager = os_tsk_create(Task_Sound_Manager, 2);
 X	t_Sound_Manager = _os_tsk_create((U32)rt_tsk_create,Task_Sound_Manager,2,0,0);
-N	t_US = os_tsk_create(Task_Update_Screen, 5);
-X	t_US = _os_tsk_create((U32)rt_tsk_create,Task_Update_Screen,5,0,0);
+N	t_US = os_tsk_create(Task_Update_Screen, 6);
+X	t_US = _os_tsk_create((U32)rt_tsk_create,Task_Update_Screen,6,0,0);
 N	t_Refill_Sound_Buffer = os_tsk_create(Task_Refill_Sound_Buffer, 1);
 X	t_Refill_Sound_Buffer = _os_tsk_create((U32)rt_tsk_create,Task_Refill_Sound_Buffer,1,0,0);
+N	t_GameStats = os_tsk_create(Task_GameStats, 5);
+X	t_GameStats = _os_tsk_create((U32)rt_tsk_create,Task_GameStats,5,0,0);
 N
 N
 N  os_tsk_delete_self ();
@@ -9481,6 +9492,7 @@ N		os_itv_wait();
 X		_os_itv_wait((U32)rt_itv_wait);
 N		PTB->PSOR = MASK(DEBUG_T1_POS);
 X		((GPIO_Type *)(0x400FF040u))->PSOR = (1UL << (1));
+N		Sound_Disable_Amp();
 N		if (TFT_TS_Read(&p)) { 
 N			// Send message indicating screen was pressed
 N			// os_evt_set(EV_PLAYSOUND, t_Sound);
@@ -9488,29 +9500,32 @@ N
 N			if (p.Y > 240) { 
 N				if (p.X < TFT_WIDTH/2) {
 X				if (p.X < (240)/2) {
-N					Sound_Disable_Amp();
+N					//Sound_Disable_Amp();
 N				} else {
-N					Sound_Enable_Amp();
+N					//Sound_Enable_Amp();
+N					//Sound_Disable_Amp();
 N				}
 N			} else {
 N				// Now draw on screen
 N				if ((pp.X == 0) && (pp.Y == 0)) {
 N					pp = p;
 N				}
-N				os_mut_wait(&LCD_mutex, WAIT_FOREVER);
-X				_os_mut_wait((U32)rt_mut_wait,&LCD_mutex,(0xffff));
-N				TFT_Draw_Line(&p, &pp, &c);
-N				os_mut_release(&LCD_mutex);
-X				_os_mut_release((U32)rt_mut_release,&LCD_mutex);
+N#if 0
+S				os_mut_wait(&LCD_mutex, WAIT_FOREVER);
+S				TFT_Draw_Line(&p, &pp, &c);
+S				os_mut_release(&LCD_mutex);
+N#endif
 N				pp = p;
 N			} 
 N		} else {
 N			pp.X = 0;
 N			pp.Y = 0;
+N			//Sound_Disable_Amp();
 N		}
 N		PTB->PCOR = MASK(DEBUG_T1_POS);
 X		((GPIO_Type *)(0x400FF040u))->PCOR = (1UL << (1));
 N	}
+W "src\tasks.c" 80 10 variable "c" was set but never used
 N}
 N
 N__task void Task_Read_Accelerometer(void) {
@@ -9518,8 +9533,17 @@ X__declspec(noreturn) void Task_Read_Accelerometer(void) {
 N	char buffer[16];
 N	
 N	//buffer to send data using a mailbox
-N	float mbx_buf[1];
+N	float* TRA_mbx_buf;
 N	
+N	//------------------------------------------------------------
+N	
+N	os_mbx_init(&ACCL_mailbox,sizeof(ACCL_mailbox)); // number of elements being sent
+X	_os_mbx_init((U32)rt_mbx_init,&ACCL_mailbox,sizeof(ACCL_mailbox)); 
+N	
+N	
+W "src\tasks.c" 138 25 function "malloc" declared implicitly
+N	TRA_mbx_buf = (float*) malloc(sizeof(float));
+N		
 N	
 N	os_itv_set(TASK_READ_ACCELEROMETER_PERIOD_TICKS);
 X	_os_itv_set((U32)rt_itv_set,(100));
@@ -9530,11 +9554,15 @@ X		_os_itv_wait((U32)rt_itv_wait);
 N		PTB->PSOR = MASK(DEBUG_T0_POS);
 X		((GPIO_Type *)(0x400FF040u))->PSOR = (1UL << (0));
 N		//roll = read_full_xyz();
-N		mbx_buf[0] = read_full_xyz();
+N		*TRA_mbx_buf = read_full_xyz();
+N		
+N		//roll = *TRA_mbx_buf;
+N		 
 N		
 N		// send with maximum timeout less than infinity
-N		if((ret_val=os_mbx_send(&ACCL_mailbox,&mbx_buf,0xFFFE)) != OS_R_OK)
-X		if((ret_val=_os_mbx_send((U32)rt_mbx_send,&ACCL_mailbox,&mbx_buf,0xFFFE)) != 0x00)
+N		if((os_mbx_send(&ACCL_mailbox,TRA_mbx_buf,0xFFFF)) != OS_R_OK)
+X		if((_os_mbx_send((U32)rt_mbx_send,&ACCL_mailbox,TRA_mbx_buf,0xFFFF)) != 0x00)
+N	  //if(0)
 N		{
 N			sprintf(buffer, "Error in MBX Send!!");
 N			os_mut_wait(&LCD_mutex, WAIT_FOREVER);
@@ -9543,30 +9571,17 @@ N			TFT_Text_PrintStr_RC(TFT_MAX_ROWS-5, 3, buffer);
 X			TFT_Text_PrintStr_RC(((320)/G_TFT_char_height)-5, 3, buffer);
 N			os_mut_release(&LCD_mutex);
 X			_os_mut_release((U32)rt_mut_release,&LCD_mutex);
-N			while(1); // only for debugging
+N			//while(1); // only for debugging
 N		}			
 N		
 N		//convert_xyz_to_roll_pitch();
-N
 N#if 0
-S		sprintf(buffer, "Score: %d", score);
+S		sprintf(buffer, "Roll: %6.2f", *TRA_mbx_buf);
 S		os_mut_wait(&LCD_mutex, WAIT_FOREVER);
 S		TFT_Text_PrintStr_RC(2, 0, buffer);
 S		os_mut_release(&LCD_mutex);
-S
-S		sprintf(buffer, "Life: %d", life);
-S		os_mut_wait(&LCD_mutex, WAIT_FOREVER);
-S		TFT_Text_PrintStr_RC(3, 0, buffer);
-S		os_mut_release(&LCD_mutex);
 N#endif
 N		
-N		sprintf(buffer, "Roll: %6.2f", roll);
-N		os_mut_wait(&LCD_mutex, WAIT_FOREVER);
-X		_os_mut_wait((U32)rt_mut_wait,&LCD_mutex,(0xffff));
-N		TFT_Text_PrintStr_RC(2, 0, buffer);
-N		os_mut_release(&LCD_mutex);
-X		_os_mut_release((U32)rt_mut_release,&LCD_mutex);
-N
 N		PTB->PCOR = MASK(DEBUG_T0_POS);
 X		((GPIO_Type *)(0x400FF040u))->PCOR = (1UL << (0));
 N	}
@@ -9580,6 +9595,9 @@ X__declspec(noreturn) void Task_Update_Screen(void) {
 N	int16_t paddle_pos=TFT_WIDTH/2;
 X	int16_t paddle_pos=(240)/2;
 N	//int16_t coin_pos=100;
+N	int16_t score=0;
+N  int16_t life=3;
+N	
 N	PT_T p1, p2,c1,c2,d1;
 N	COLOR_T paddle_color, black,coin_color;
 N	char buffer[16];
@@ -9588,15 +9606,15 @@ N
 N	float *TUS_mbx_buf;
 N	float rollVal;
 N	
-N	int8_t array_number [10][10] = {0,0,0,0,1,1,0,0,0,0,
-N																	0,0,0,1,1,1,1,0,0,0,
+N	int8_t array_number [10][10] = {0,0,0,1,1,1,0,0,0,0,
 N																	0,0,1,1,1,1,1,1,0,0,
+N																	0,1,1,1,1,1,1,1,1,0,
 N																	0,1,1,1,1,1,1,1,1,0,
 N																	1,1,1,1,1,1,1,1,1,1,
 N																	1,1,1,1,1,1,1,1,1,1,
 N																	0,1,1,1,1,1,1,1,1,0,
+N																	0,1,1,1,1,1,1,1,1,0,
 N																	0,0,1,1,1,1,1,1,0,0,
-N																	0,0,0,1,1,1,1,0,0,0,
 N																	0,0,0,0,1,1,0,0,0,0};
 N	
 N
@@ -9620,27 +9638,43 @@ N
 N	while (1) {
 N		os_itv_wait();
 X		_os_itv_wait((U32)rt_itv_wait);
-N		//if(os_mbx_wait(&ACCL_mailbox,(void**)&TUS_mbx_buf,0x00FE) == OS_R_TMO)
-N		if(0)
-N		{
+N		if(os_mbx_wait(&ACCL_mailbox, (void*)&TUS_mbx_buf,0xFFFF) == OS_R_TMO)
+X		if(_os_mbx_wait((U32)rt_mbx_wait,&ACCL_mailbox,(void*)&TUS_mbx_buf,0xFFFF) == 0x01)
+N		//if(0)
+N		{ 
 N			sprintf(buffer, "Error in MBX Receive!!");
 N			os_mut_wait(&LCD_mutex, WAIT_FOREVER);
 X			_os_mut_wait((U32)rt_mut_wait,&LCD_mutex,(0xffff));
-N			TFT_Text_PrintStr_RC(TFT_MAX_ROWS - 5, TFT_MAX_COLS, buffer);
-X			TFT_Text_PrintStr_RC(((320)/G_TFT_char_height) - 5, ((240)/G_TFT_char_width), buffer);
+N			TFT_Text_PrintStr_RC(TFT_MAX_ROWS - 8, 4, buffer);
+X			TFT_Text_PrintStr_RC(((320)/G_TFT_char_height) - 8, 4, buffer);
 N			os_mut_release(&LCD_mutex);
 X			_os_mut_release((U32)rt_mut_release,&LCD_mutex);
-N			while(1); // only for debugging
+N			//while(1); // only for debugging
+N			
 N		}
 N		
-N		//rollVal = *TUS_mbx_buf;
+N		rollVal = *TUS_mbx_buf;
 N		
-N		roll = rollVal;
+W "src\tasks.c" 235 3 function "free" declared implicitly
+N		free(TUS_mbx_buf);
+N		
+N#if 0		
+S		sprintf(buffer, "Score: %d", score);
+S		//os_mut_wait(&LCD_mutex, WAIT_FOREVER);
+S		TFT_Text_PrintStr_RC(2, 0, buffer);
+S		//os_mut_release(&LCD_mutex);
+S
+S		sprintf(buffer, "Life: %d", life);
+S		//os_mut_wait(&LCD_mutex, WAIT_FOREVER);
+S		TFT_Text_PrintStr_RC(3, 0, buffer);
+S		//os_mut_release(&LCD_mutex);
+N#endif		
+N		//roll = rollVal;
 N		
 N		PTB->PSOR = MASK(DEBUG_T3_POS);
 X		((GPIO_Type *)(0x400FF040u))->PSOR = (1UL << (3));
 N		
-N		if ((roll < -2.0) || (roll > 2.0)) {
+N		if ((rollVal < -2.0) || (rollVal > 2.0)) {
 N			p1.X = paddle_pos;
 N			p1.Y = PADDLE_Y_POS;
 X			p1.Y = ((320)-4-(15));
@@ -9650,7 +9684,7 @@ N			p2.Y = p1.Y + PADDLE_HEIGHT;
 X			p2.Y = p1.Y + (15);
 N			TFT_Fill_Rectangle(&p1, &p2, &black); 		
 N			
-N			paddle_pos += roll;
+N			paddle_pos += rollVal;
 N			paddle_pos = MAX(0, paddle_pos);
 X			paddle_pos = ((0)>(paddle_pos)? 0 : paddle_pos);
 N			paddle_pos = MIN(paddle_pos, TFT_WIDTH-PADDLE_WIDTH-1); // this needs to be cahnged to TFT_wdith - paddle width -1
@@ -9680,20 +9714,20 @@ N			if(coin_Y_pos>=300)
 N				{ 
 N					if((coin_X_pos>paddle_pos)&&(coin_X_pos<paddle_pos+PADDLE_WIDTH))
 X					if((coin_X_pos>paddle_pos)&&(coin_X_pos<paddle_pos+(40)))
-N						score+=1;
+N					{	
+N						//score+=1;
+N						os_evt_set(EV_SCORE_UPDATE,t_GameStats);
+X						_os_evt_set((U32)rt_evt_set,(uint16_t)(0x0001),t_GameStats);
+N					}
 N					else
-N						life=life-1;
-N			if(life <0 )
-N			{
-N				TFT_Text_PrintStr_RC(TFT_MAX_ROWS-4, 4, "Game Over");
-X				TFT_Text_PrintStr_RC(((320)/G_TFT_char_height)-4, 4, "Game Over");
-N				TFT_Text_PrintStr_RC(TFT_MAX_ROWS-3, 4, "Press Reset");
-X				TFT_Text_PrintStr_RC(((320)/G_TFT_char_height)-3, 4, "Press Reset");
-N				while(1);
-N			}
+N					{
+N						os_evt_set(EV_LIFE_UPDATE,t_GameStats);
+X						_os_evt_set((U32)rt_evt_set,(uint16_t)(0x0002),t_GameStats);
+N					}
+N			
 N					coin_Y_pos=100;
 N			
-W "src\tasks.c" 265 18 function "rand" declared implicitly
+W "src\tasks.c" 292 18 function "rand" declared implicitly
 N					coin_X_pos=(rand()) % 230;
 N				}
 N	//		TFT_Fill_Rectangle(&c1,&c2,&paddle_color);
@@ -9713,5 +9747,57 @@ N			}
 N		PTB->PCOR = MASK(DEBUG_T3_POS);
 X		((GPIO_Type *)(0x400FF040u))->PCOR = (1UL << (3));
 N	}
-W "src\tasks.c" 176 9 variable "TUS_mbx_buf" was declared but never referenced
+W "src\tasks.c" 181 10 variable "score" was declared but never referenced
+W "src\tasks.c" 182 11 variable "life" was declared but never referenced
 N}
+N
+N__task void Task_GameStats(void)
+X__declspec(noreturn) void Task_GameStats(void)
+N{
+N	char buffer[16];
+N	uint16_t score=0;
+N	uint8_t life=3;
+N	
+N	while(1)
+N	{
+N		os_evt_wait_or((EV_LIFE_UPDATE|EV_SCORE_UPDATE), WAIT_FOREVER);
+X		_os_evt_wait((U32)rt_evt_wait,((uint16_t)(0x0002)|(uint16_t)(0x0001)),(0xffff),0);
+N		
+N		if(os_evt_get() == EV_LIFE_UPDATE)
+X		if(_os_evt_get((U32)rt_evt_get) == (uint16_t)(0x0002))
+N		{
+N			if(life!=0)
+N			{
+N				--life;
+N			}
+N			else
+N			{
+N				TFT_Text_PrintStr_RC(TFT_MAX_ROWS-4, 4, "Game Over");
+X				TFT_Text_PrintStr_RC(((320)/G_TFT_char_height)-4, 4, "Game Over");
+N				TFT_Text_PrintStr_RC(TFT_MAX_ROWS-3, 4, "Press Reset");
+X				TFT_Text_PrintStr_RC(((320)/G_TFT_char_height)-3, 4, "Press Reset");
+N				while(1);
+N			}
+N		}
+N		else if(os_evt_get() == EV_SCORE_UPDATE)
+X		else if(_os_evt_get((U32)rt_evt_get) == (uint16_t)(0x0001))
+N		{
+N			++score;
+N		}
+N		
+N		sprintf(buffer, "Score: %d", score);
+N		os_mut_wait(&LCD_mutex, WAIT_FOREVER);
+X		_os_mut_wait((U32)rt_mut_wait,&LCD_mutex,(0xffff));
+N		TFT_Text_PrintStr_RC(0, 0, buffer);
+N		os_mut_release(&LCD_mutex);
+X		_os_mut_release((U32)rt_mut_release,&LCD_mutex);
+N
+N		sprintf(buffer, "Life: %d", life);
+N		os_mut_wait(&LCD_mutex, WAIT_FOREVER);
+X		_os_mut_wait((U32)rt_mut_wait,&LCD_mutex,(0xffff));
+N		TFT_Text_PrintStr_RC(1, 0, buffer);
+N		os_mut_release(&LCD_mutex);
+X		_os_mut_release((U32)rt_mut_release,&LCD_mutex);
+N	}
+N}
+N

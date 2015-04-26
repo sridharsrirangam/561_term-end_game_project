@@ -8195,6 +8195,8 @@ N __task void Task_Read_Accelerometer(void);
 X __declspec(noreturn) void Task_Read_Accelerometer(void);
 N __task void Task_Update_Screen(void);
 X __declspec(noreturn) void Task_Update_Screen(void);
+N __task void Task_GameStats(void);
+X __declspec(noreturn) void Task_GameStats(void);
 N 
 Nextern OS_TID t_Read_TS, t_Read_Accelerometer, t_Sound_Manager, t_US, t_Refill_Sound_Buffer;
 N
@@ -8206,6 +8208,10 @@ N#define PADDLE_Y_POS (TFT_HEIGHT-4-PADDLE_HEIGHT)
 N
 N// constants for coin dimensions
 N#define COIN_RADIUS (10)
+N
+N// Event Flags for Update Screen
+N#define EV_SCORE_UPDATE (uint16_t)(0x0001)
+N#define EV_LIFE_UPDATE (uint16_t)(0x0002)
 N
 N#endif // TASKS_H
 L 8 "src\DMA.c" 2

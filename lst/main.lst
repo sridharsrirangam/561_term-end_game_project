@@ -10928,6 +10928,8 @@ N __task void Task_Read_Accelerometer(void);
 X __declspec(noreturn) void Task_Read_Accelerometer(void);
 N __task void Task_Update_Screen(void);
 X __declspec(noreturn) void Task_Update_Screen(void);
+N __task void Task_GameStats(void);
+X __declspec(noreturn) void Task_GameStats(void);
 N 
 Nextern OS_TID t_Read_TS, t_Read_Accelerometer, t_Sound_Manager, t_US, t_Refill_Sound_Buffer;
 N
@@ -10940,6 +10942,10 @@ N
 N// constants for coin dimensions
 N#define COIN_RADIUS (10)
 N
+N// Event Flags for Update Screen
+N#define EV_SCORE_UPDATE (uint16_t)(0x0001)
+N#define EV_LIFE_UPDATE (uint16_t)(0x0002)
+N
 N#endif // TASKS_H
 L 23 "src\main.c" 2
 N
@@ -10950,6 +10956,8 @@ N  MAIN function
 N *----------------------------------------------------------------------------*/
 Nint main (void) {
 N
+N	char buffer[16];
+N	
 N	Init_Debug_Signals();
 N	Init_RGB_LEDs();                                                                                                                                                                                                                                                                                                                                                                                                                                             
 N	Sound_Init();	
@@ -10959,18 +10967,22 @@ N
 N	TFT_Init();
 N	TFT_Text_Init(1);
 N	TFT_Erase();
-N	TFT_Text_PrintStr_RC(0,0, "Test Code");
+N	//TFT_Text_PrintStr_RC(0,0, "Test Code");
+N	sprintf(buffer, "Score: 0");
+N	TFT_Text_PrintStr_RC(0, 0, buffer);
+N	sprintf(buffer, "Life: 3");
+N	TFT_Text_PrintStr_RC(1, 0, buffer);
 N
 N/*
 N	Graphics_Test();
 N	while (1) 
 N		;
 N*/
-N	
+N
 N//	TFT_TS_Calibrate();
 N//	TFT_TS_Test();
 N
-N	TFT_Text_PrintStr_RC(1,0, "Accel...");
+N//	TFT_Text_PrintStr_RC(1,0, "Accel...");
 N
 N	i2c_init();											// init I2C peripheral
 N	if (!init_mma()) {							// init accelerometer
@@ -10978,7 +10990,7 @@ N		Control_RGB_LEDs(1,0,0);			// accel initialization failed, so turn on red err
 N		while (1)
 N			;
 N	}
-N	TFT_Text_PrintStr_RC(1,9, "Done");
+N	//TFT_Text_PrintStr_RC(1,9, "Done");
 N
 N	Play_Waveform_with_DMA();
 N

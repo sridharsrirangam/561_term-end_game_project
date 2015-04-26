@@ -29,6 +29,7 @@
  __task void Task_Read_TS(void);
  __task void Task_Read_Accelerometer(void);
  __task void Task_Update_Screen(void);
+ __task void Task_GameStats(void);
  
 extern OS_TID t_Read_TS, t_Read_Accelerometer, t_Sound_Manager, t_US, t_Refill_Sound_Buffer;
 
@@ -40,5 +41,9 @@ extern OS_TID t_Read_TS, t_Read_Accelerometer, t_Sound_Manager, t_US, t_Refill_S
 
 // constants for coin dimensions
 #define COIN_RADIUS (10)
+
+// Event Flags for Update Screen
+#define EV_SCORE_UPDATE (uint16_t)(0x0001)
+#define EV_LIFE_UPDATE (uint16_t)(0x0002)
 
 #endif // TASKS_H

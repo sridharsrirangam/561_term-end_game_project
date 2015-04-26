@@ -28,6 +28,8 @@
  *----------------------------------------------------------------------------*/
 int main (void) {
 
+	char buffer[16];
+	
 	Init_Debug_Signals();
 	Init_RGB_LEDs();                                                                                                                                                                                                                                                                                                                                                                                                                                             
 	Sound_Init();	
@@ -37,18 +39,22 @@ int main (void) {
 	TFT_Init();
 	TFT_Text_Init(1);
 	TFT_Erase();
-	TFT_Text_PrintStr_RC(0,0, "Test Code");
+	//TFT_Text_PrintStr_RC(0,0, "Test Code");
+	sprintf(buffer, "Score: 0");
+	TFT_Text_PrintStr_RC(0, 0, buffer);
+	sprintf(buffer, "Life: 3");
+	TFT_Text_PrintStr_RC(1, 0, buffer);
 
 /*
 	Graphics_Test();
 	while (1) 
 		;
 */
-	
+
 //	TFT_TS_Calibrate();
 //	TFT_TS_Test();
 
-	TFT_Text_PrintStr_RC(1,0, "Accel...");
+//	TFT_Text_PrintStr_RC(1,0, "Accel...");
 
 	i2c_init();											// init I2C peripheral
 	if (!init_mma()) {							// init accelerometer
@@ -56,7 +62,7 @@ int main (void) {
 		while (1)
 			;
 	}
-	TFT_Text_PrintStr_RC(1,9, "Done");
+	//TFT_Text_PrintStr_RC(1,9, "Done");
 
 	Play_Waveform_with_DMA();
 
