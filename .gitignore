@@ -25,6 +25,13 @@
 *.out
 *.app
 *.i*86
+
+#added by adeesh
+.htm
+.lst
+.dep
+.axf
+
 *.x86_64
 *.hex
 
