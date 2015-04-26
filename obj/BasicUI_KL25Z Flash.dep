@@ -16,7 +16,7 @@ I (C:\Keil_v5\ARM\CMSIS\Include\core_cmFunc.h)(0x5346F044)
 I (C:\Keil_v5\ARM\Inc\Freescale\Kinetis\system_MKL25Z4.h)(0x5346EE14)
 I (C:\Keil_v5\ARM\ARMCC\include\stdio.h)(0x5476B7E0)
 I (.\inc\gpio_defs.h)(0x553BFD96)
-I (.\inc\tft_lcd.h)(0x553BFD96)
+I (.\inc\tft_lcd.h)(0x553C8B86)
 I (.\inc\font.h)(0x553BFD96)
 I (.\inc\LEDs.h)(0x553BFD96)
 I (.\inc\timers.h)(0x553BFD96)
@@ -28,7 +28,7 @@ I (.\inc\mma8451.h)(0x553C1938)
 I (.\inc\delay.h)(0x553BFD96)
 I (.\inc\profile.h)(0x553BFD96)
 I (C:\Keil_v5\ARM\ARMCC\include\math.h)(0x54DFAD57)
-I (.\inc\tasks.h)(0x553C80AF)
+I (.\inc\tasks.h)(0x553C95B5)
 F (.\src\LEDs.c)(0x553BFD97)(-c --cpu Cortex-M0+ -D__RTX -D__EVAL -D__MICROLIB -g -O1 --apcs=interwork -I.\inc --fpmode=fast-I C:\Keil_v5\ARM\RV31\INC-I C:\Keil_v5\ARM\CMSIS\Include-I C:\Keil_v5\ARM\Inc\Freescale\Kinetis-D__UVISION_VERSION="513"-o .\obj\leds.o --list_dir ".\\lst\\" --list --omf_browse .\obj\leds.crf --depend .\obj\leds.d)
 I (C:\Keil_v5\ARM\Inc\Freescale\Kinetis\MKL25Z4.H)(0x5346EE14)
 I (C:\Keil_v5\ARM\CMSIS\Include\core_cm0plus.h)(0x5346F044)
@@ -67,7 +67,7 @@ I (C:\Keil_v5\ARM\CMSIS\Include\core_cmFunc.h)(0x5346F044)
 I (C:\Keil_v5\ARM\Inc\Freescale\Kinetis\system_MKL25Z4.h)(0x5346EE14)
 I (.\inc\region.h)(0x553BFD96)
 I (.\inc\profile.h)(0x553BFD96)
-I (.\inc\TFT_LCD.h)(0x553BFD96)
+I (.\inc\TFT_LCD.h)(0x553C8B86)
 I (.\inc\font.h)(0x553BFD96)
 F (.\src\region.c)(0x553BFD97)(-c --cpu Cortex-M0+ -D__RTX -D__EVAL -D__MICROLIB -g -O1 --apcs=interwork -I.\inc --fpmode=fast-I C:\Keil_v5\ARM\RV31\INC-I C:\Keil_v5\ARM\CMSIS\Include-I C:\Keil_v5\ARM\Inc\Freescale\Kinetis-D__UVISION_VERSION="513"-o .\obj\region.o --list_dir ".\\lst\\" --list --omf_browse .\obj\region.crf --depend .\obj\region.d)
 I (.\inc\region.h)(0x553BFD96)
@@ -94,9 +94,9 @@ I (.\inc\delay.h)(0x553BFD96)
 I (.\inc\gpio_defs.h)(0x553BFD96)
 I (.\inc\timers.h)(0x553BFD96)
 I (.\inc\DMA.h)(0x553BFD96)
-I (.\inc\tasks.h)(0x553C80AF)
-I (.\inc\TFT_LCD.h)(0x553BFD96)
-F (.\src\tasks.c)(0x553C8889)(-c --cpu Cortex-M0+ -D__RTX -D__EVAL -D__MICROLIB -g -O1 --apcs=interwork -I.\inc --fpmode=fast-I C:\Keil_v5\ARM\RV31\INC-I C:\Keil_v5\ARM\CMSIS\Include-I C:\Keil_v5\ARM\Inc\Freescale\Kinetis-D__UVISION_VERSION="513"-o .\obj\tasks.o --list_dir ".\\lst\\" --list --omf_browse .\obj\tasks.crf --depend .\obj\tasks.d)
+I (.\inc\tasks.h)(0x553C95B5)
+I (.\inc\TFT_LCD.h)(0x553C8B86)
+F (.\src\tasks.c)(0x553C9C0A)(-c --cpu Cortex-M0+ -D__RTX -D__EVAL -D__MICROLIB -g -O1 --apcs=interwork -I.\inc --fpmode=fast-I C:\Keil_v5\ARM\RV31\INC-I C:\Keil_v5\ARM\CMSIS\Include-I C:\Keil_v5\ARM\Inc\Freescale\Kinetis-D__UVISION_VERSION="513"-o .\obj\tasks.o --list_dir ".\\lst\\" --list --omf_browse .\obj\tasks.crf --depend .\obj\tasks.d)
 I (C:\Keil_v5\ARM\ARMCC\include\stdint.h)(0x5476B7E0)
 I (C:\Keil_v5\ARM\ARMCC\include\stdio.h)(0x5476B7E0)
 I (C:\Keil_v5\ARM\RV31\INC\RTL.h)(0x54332E14)
@@ -105,9 +105,9 @@ I (C:\Keil_v5\ARM\CMSIS\Include\core_cm0plus.h)(0x5346F044)
 I (C:\Keil_v5\ARM\CMSIS\Include\core_cmInstr.h)(0x5346F044)
 I (C:\Keil_v5\ARM\CMSIS\Include\core_cmFunc.h)(0x5346F044)
 I (C:\Keil_v5\ARM\Inc\Freescale\Kinetis\system_MKL25Z4.h)(0x5346EE14)
-I (.\inc\TFT_LCD.h)(0x553BFD96)
+I (.\inc\TFT_LCD.h)(0x553C8B86)
 I (.\inc\font.h)(0x553BFD96)
-I (.\inc\tasks.h)(0x553C80AF)
+I (.\inc\tasks.h)(0x553C95B5)
 I (.\inc\MMA8451.h)(0x553C1938)
 I (.\inc\sound.h)(0x553BFD96)
 I (.\inc\DMA.h)(0x553BFD96)
@@ -130,8 +130,8 @@ I (C:\Keil_v5\ARM\Inc\Freescale\Kinetis\system_MKL25Z4.h)(0x5346EE14)
 I (C:\Keil_v5\ARM\RV31\INC\RTL.h)(0x54332E14)
 I (.\inc\timers.h)(0x553BFD96)
 I (.\inc\LEDs.h)(0x553BFD96)
-I (.\inc\tasks.h)(0x553C80AF)
-I (.\inc\TFT_LCD.h)(0x553BFD96)
+I (.\inc\tasks.h)(0x553C95B5)
+I (.\inc\TFT_LCD.h)(0x553C8B86)
 F (.\src\MMA8451.c)(0x553C4F75)(-c --cpu Cortex-M0+ -D__RTX -D__EVAL -D__MICROLIB -g -O1 --apcs=interwork -I.\inc --fpmode=fast-I C:\Keil_v5\ARM\RV31\INC-I C:\Keil_v5\ARM\CMSIS\Include-I C:\Keil_v5\ARM\Inc\Freescale\Kinetis-D__UVISION_VERSION="513"-o .\obj\mma8451.o --list_dir ".\\lst\\" --list --omf_browse .\obj\mma8451.crf --depend .\obj\mma8451.d)
 I (C:\Keil_v5\ARM\Inc\Freescale\Kinetis\MKL25Z4.H)(0x5346EE14)
 I (C:\Keil_v5\ARM\CMSIS\Include\core_cm0plus.h)(0x5346F044)
@@ -145,7 +145,7 @@ I (.\inc\delay.h)(0x553BFD96)
 I (.\inc\LEDs.h)(0x553BFD96)
 I (C:\Keil_v5\ARM\ARMCC\include\math.h)(0x54DFAD57)
 F (.\src\TFT_graphics.c)(0x553BFD97)(-c --cpu Cortex-M0+ -D__RTX -D__EVAL -D__MICROLIB -g -O1 --apcs=interwork -I.\inc --fpmode=fast-I C:\Keil_v5\ARM\RV31\INC-I C:\Keil_v5\ARM\CMSIS\Include-I C:\Keil_v5\ARM\Inc\Freescale\Kinetis-D__UVISION_VERSION="513"-o .\obj\tft_graphics.o --list_dir ".\\lst\\" --list --omf_browse .\obj\tft_graphics.crf --depend .\obj\tft_graphics.d)
-I (.\inc\TFT_LCD.h)(0x553BFD96)
+I (.\inc\TFT_LCD.h)(0x553C8B86)
 I (C:\Keil_v5\ARM\ARMCC\include\stdint.h)(0x5476B7E0)
 F (.\src\TFT_lcd.c)(0x553BFD97)(-c --cpu Cortex-M0+ -D__RTX -D__EVAL -D__MICROLIB -g -O1 --apcs=interwork -I.\inc --fpmode=fast-I C:\Keil_v5\ARM\RV31\INC-I C:\Keil_v5\ARM\CMSIS\Include-I C:\Keil_v5\ARM\Inc\Freescale\Kinetis-D__UVISION_VERSION="513"-o .\obj\tft_lcd.o --list_dir ".\\lst\\" --list --omf_browse .\obj\tft_lcd.crf --depend .\obj\tft_lcd.d)
 I (C:\Keil_v5\ARM\ARMCC\include\stdint.h)(0x5476B7E0)
@@ -155,11 +155,11 @@ I (C:\Keil_v5\ARM\CMSIS\Include\core_cm0plus.h)(0x5346F044)
 I (C:\Keil_v5\ARM\CMSIS\Include\core_cmInstr.h)(0x5346F044)
 I (C:\Keil_v5\ARM\CMSIS\Include\core_cmFunc.h)(0x5346F044)
 I (C:\Keil_v5\ARM\Inc\Freescale\Kinetis\system_MKL25Z4.h)(0x5346EE14)
-I (.\inc\TFT_LCD.h)(0x553BFD96)
+I (.\inc\TFT_LCD.h)(0x553C8B86)
 I (.\inc\gpio_defs.h)(0x553BFD96)
 I (.\inc\timers.h)(0x553BFD96)
 I (.\inc\font.h)(0x553BFD96)
 F (.\src\TFT_text.c)(0x553C14BD)(-c --cpu Cortex-M0+ -D__RTX -D__EVAL -D__MICROLIB -g -O1 --apcs=interwork -I.\inc --fpmode=fast-I C:\Keil_v5\ARM\RV31\INC-I C:\Keil_v5\ARM\CMSIS\Include-I C:\Keil_v5\ARM\Inc\Freescale\Kinetis-D__UVISION_VERSION="513"-o .\obj\tft_text.o --list_dir ".\\lst\\" --list --omf_browse .\obj\tft_text.crf --depend .\obj\tft_text.d)
 I (.\inc\font.h)(0x553BFD96)
 I (C:\Keil_v5\ARM\ARMCC\include\stdint.h)(0x5476B7E0)
-I (.\inc\TFT_LCD.h)(0x553BFD96)
+I (.\inc\TFT_LCD.h)(0x553C8B86)

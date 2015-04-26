@@ -48,7 +48,7 @@
 #define MAX(a,b) ((a)>(b)? a : b)
 
 typedef struct {
-	uint32_t X, Y;
+	uint16_t X, Y;
 } PT_T;
 
 typedef struct {

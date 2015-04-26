@@ -8123,7 +8123,7 @@ N#define MIN(a,b) ((a)<(b)? a : b)
 N#define MAX(a,b) ((a)>(b)? a : b)
 N
 Ntypedef struct {
-N	uint32_t X, Y;
+N	uint16_t X, Y;
 N} PT_T;
 N
 Ntypedef struct {
@@ -8212,6 +8212,10 @@ N
 N// Event Flags for Update Screen
 N#define EV_SCORE_UPDATE (uint16_t)(0x0001)
 N#define EV_LIFE_UPDATE (uint16_t)(0x0002)
+N
+N//Event flag for Read TouchScreen
+N#define EV_TOUCH_DETECTED (uint16_t)(0x0001)
+N
 N
 N#endif // TASKS_H
 L 8 "src\DMA.c" 2

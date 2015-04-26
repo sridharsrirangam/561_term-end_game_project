@@ -383,7 +383,7 @@ N#define MIN(a,b) ((a)<(b)? a : b)
 N#define MAX(a,b) ((a)>(b)? a : b)
 N
 Ntypedef struct {
-N	uint32_t X, Y;
+N	uint16_t X, Y;
 N} PT_T;
 N
 Ntypedef struct {

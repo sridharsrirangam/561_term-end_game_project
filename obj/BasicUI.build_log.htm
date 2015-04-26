@@ -27,22 +27,24 @@ Project File Date:  04/25/2015
 <h2>Output:</h2>
 Build target 'KL25Z Flash'
 compiling tasks.c...
-src\tasks.c(80): warning:  #550-D: variable "c" was set but never used
-        COLOR_T c;
-src\tasks.c(138): warning:  #223-D: function "malloc" declared implicitly
+src\tasks.c(79): warning:  #177-D: variable "TRT_mbx_buf" was declared but never referenced
+        uint16_t* TRT_mbx_buf;
+src\tasks.c(128): warning:  #223-D: function "malloc" declared implicitly
         TRA_mbx_buf = (float*) malloc(sizeof(float));
-src\tasks.c(235): warning:  #223-D: function "free" declared implicitly
+src\tasks.c(229): warning:  #223-D: function "free" declared implicitly
                 free(TUS_mbx_buf);
-src\tasks.c(292): warning:  #223-D: function "rand" declared implicitly
+src\tasks.c(295): warning:  #223-D: function "rand" declared implicitly
                                         coin_X_pos=(rand()) % 230;
-src\tasks.c(181): warning:  #177-D: variable "score" was declared but never referenced
+src\tasks.c(169): warning:  #177-D: variable "score" was declared but never referenced
         int16_t score=0;
-src\tasks.c(182): warning:  #177-D: variable "life" was declared but never referenced
+src\tasks.c(170): warning:  #177-D: variable "life" was declared but never referenced
     int16_t life=3;
-src\tasks.c: 6 warnings, 0 errors
+src\tasks.c(181): warning:  #177-D: variable "fastFlag" was declared but never referenced
+        uint8_t fastFlag,speed=5;
+src\tasks.c: 7 warnings, 0 errors
 linking...
-Program Size: Code=15828 RO-data=7592 RW-data=180 ZI-data=6652  
-".\obj\BasicUI.axf" - 0 Error(s), 6 Warning(s).
+Program Size: Code=15888 RO-data=7592 RW-data=172 ZI-data=6652  
+".\obj\BasicUI.axf" - 0 Error(s), 7 Warning(s).
 </pre>
 </body>
 </html>

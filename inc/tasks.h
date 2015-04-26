@@ -46,4 +46,8 @@ extern OS_TID t_Read_TS, t_Read_Accelerometer, t_Sound_Manager, t_US, t_Refill_S
 #define EV_SCORE_UPDATE (uint16_t)(0x0001)
 #define EV_LIFE_UPDATE (uint16_t)(0x0002)
 
+//Event flag for Read TouchScreen
+#define EV_TOUCH_DETECTED (uint16_t)(0x0001)
+
+
 #endif // TASKS_H
