@@ -2,6 +2,7 @@
 #include "MKL25Z4.h"
 #include "region.h"
 #include "profile.h"
+#include "rtl.h"
 
 volatile unsigned PIT_interrupt_counter = 0;
 volatile unsigned LCD_update_requested = 0;
@@ -12,10 +13,35 @@ extern volatile char profiling_enabled;
 
 extern volatile unsigned int adx_lost, num_lost; 
 
+extern OS_TID t_Read_TS, t_Read_Accelerometer, t_Sound_Manager, t_US,
+							t_Refill_Sound_Buffer, t_GameStats, t_CPUStats;
+
+
+
+uint32_t count_t_Read_TS=0,
+        count_t_Read_Accelerometer=0,
+	 			count_t_Sound_Manager=0,
+				count_t_US=0,
+				count_t_Refill_Sound_Buffer=0,
+				count_t_GameStats=0,
+				count_t_CPUStats=0,
+				count_idle=0,
+				count_total=0;
+
+/*	float util_t_Read_TS=0,
+        util_t_Read_Accelerometer=0,
+	 			util_t_Sound_Manager=0,
+				util_t_US=0,
+				util_t_Refill_Sound_Buffer=0,
+				util_t_GameStats=0,
+				util_t_CPUStats=0,
+				util_idle=0,
+       	util_total=0;	
+	*/
 void PIT_IRQHandler() {
 	unsigned int s, e;
   unsigned int i;
-	
+   OS_TID interrupted_task;	
 	//clear pending IRQ
 	NVIC_ClearPendingIRQ(PIT_IRQn);
 	
@@ -25,6 +51,39 @@ void PIT_IRQHandler() {
 		PIT->CHANNEL[0].TFLG &= PIT_TFLG_TIF_MASK;
 		
 		// Do ISR work
+		
+		//check which task got interrupted
+		interrupted_task = isr_tsk_get();
+		count_total++;
+	if(interrupted_task==t_Read_TS)
+	{++count_t_Read_TS;}
+	else if(interrupted_task==t_Read_Accelerometer)
+	{++count_t_Read_Accelerometer;}
+	else if(interrupted_task==t_Sound_Manager)
+	{++count_t_Sound_Manager;}
+	else if(interrupted_task==t_US)
+	{++count_t_US;}
+	else if(interrupted_task==t_Refill_Sound_Buffer)
+	{++count_t_Refill_Sound_Buffer;}
+	else if(interrupted_task==t_GameStats)
+	{++count_t_GameStats;}
+	else if(interrupted_task==t_CPUStats)
+	{++count_t_CPUStats;}
+	else if(interrupted_task==0xFF)
+	{++count_idle;}
+/*
+    util_t_Read_Accelerometer = (count_t_Read_Accelerometer/count_total)*100;
+		util_t_Read_TS = (count_t_Read_TS/count_total)*100;
+		util_t_Sound_Manager=(count_t_Sound_Manager/count_total)*100;
+		util_t_US=(count_t_US/count_total)*100;
+		util_t_Refill_Sound_Buffer=(count_t_Refill_Sound_Buffer/count_total)*100;
+		util_t_GameStats=(count_t_GameStats/count_total)*100;
+		util_t_CPUStats=(count_t_CPUStats/count_total)*100;
+		util_idle=(count_idle/count_total)*100;
+
+	*/
+	
+		
 		// Profiler
 		if (profiling_enabled > 0) {
 			PC_val = *((unsigned int *) (__current_sp()+CUR_FRAME_SIZE+RET_ADX_OFFSET));

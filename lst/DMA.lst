@@ -8215,6 +8215,8 @@ N// Event Flags for Update Screen
 N#define EV_SCORE_UPDATE (uint16_t)(0x0001)
 N#define EV_LIFE_UPDATE (uint16_t)(0x0002)
 N
+N//Event flag to trigger CPU Stat task. Will be set by read_TS task
+N#define EV_CPU_STAT_UPDATE (uint16_t)(0x0001)
 N//Event flag for Read TouchScreen
 N#define EV_TOUCH_DETECTED (uint16_t)(0x0001)
 N

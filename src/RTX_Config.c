@@ -24,7 +24,7 @@
 //   <i> Define max. number of tasks that will run at the same time.
 //   <i> Default: 6
 #ifndef OS_TASKCNT
- #define OS_TASKCNT     7
+ #define OS_TASKCNT     10
 #endif
 
 //   <o>Number of tasks with user-provided stack <0-250>
@@ -32,14 +32,14 @@
 //   <i> The memory space for the stack is provided by the user.
 //   <i> Default: 0
 #ifndef OS_PRIVCNT
- #define OS_PRIVCNT     1
+ #define OS_PRIVCNT     2
 #endif
 
 //   <o>Task stack size [bytes] <20-4096:8><#/4>
 //   <i> Set the stack size for tasks which is assigned by the system.
 //   <i> Default: 512
 #ifndef OS_STKSIZE
- #define OS_STKSIZE     64
+ #define OS_STKSIZE     128
 #endif
 
 // <q>Check for the stack overflow
@@ -184,13 +184,14 @@ void os_tmr_call (U16 info) {
 
 
 /*--------------------------- os_error --------------------------------------*/
-
 void os_error (U32 err_code) {
   /* This function is called when a runtime error is detected. Parameter */
   /* 'err_code' holds the runtime error code (defined in RTL.H).         */
 
   /* HERE: include optional code to be executed on runtime error. */
-  for (;;);
+ 
+	
+	for (;;);
 }
 
 

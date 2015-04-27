@@ -111,6 +111,11 @@ uint16_t Sound_Generate_Next_Sample (void) {
 	return lfsr & 0x03ff;
 }
 
+uint16_t Sound_get_next_sound (int i)
+{
+	return (1000*i);
+}
+
 // void Play_Waveform_with_DMA(uint32_t sample_period_us, uint16_t * waveform, uint32_t num_samples) {
 void Play_Waveform_with_DMA(void) {
 	//	Init_Waveform();
@@ -132,8 +137,8 @@ __task void Task_Sound_Manager(void) {
 	os_itv_set(1000);
 	
 	while (1) {
-		os_itv_wait();
-		//		os_evt_wait_and(EV_PLAYSOUND, WAIT_FOREVER); // wait for trigger
+		//os_itv_wait();
+				os_evt_wait_and(EV_PLAYSOUND, WAIT_FOREVER); // wait for trigger
 		// make a new sound every second
 		
 		// Hack - temporary code until voice code is added
@@ -144,13 +149,21 @@ __task void Task_Sound_Manager(void) {
 
 __task void Task_Refill_Sound_Buffer(void) {
 	uint32_t i;
-	
+	/*
+	uint16_t Wave[512];
+		for (i=0; i<NUM_WAVEFORM_SAMPLES; i++)
+	{
+		Wave[i] = i;
+	}
+	*/
 	while (1) {
 		os_evt_wait_and(EV_REFILL_SOUND, WAIT_FOREVER); // wait for trigger
 
 		for (i=0; i<NUM_WAVEFORM_SAMPLES; i++) {
 			if (WNG_Len > 0) {
-				Waveform[i] = Sound_Generate_Next_Sample();
+				Waveform[i] = Sound_get_next_sound(i);
+			//	Waveform[i] = Wave[i] ;//0x0005 & 0x03ff ;
+				
 				WNG_Len--;
 			} else {
 				Waveform[i] = MAX_DAC_CODE/2;

@@ -9103,6 +9103,7 @@ N
 N#endif // #ifndef FONT_H
 L 11 "src\profile.c" 2
 N
+N
 Nvolatile unsigned int adx_lost=0, num_lost=0; 
 Nvolatile unsigned long profile_ticks=0;
 Nvolatile char profiling_enabled = 0;

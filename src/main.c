@@ -29,7 +29,10 @@
 int main (void) {
 
 	char buffer[16];
-	
+	//
+	PIT_Init(2399); // 24 MHz/(23999+1) = 1000 samples per second
+	PIT_Start();
+	//
 	Init_Debug_Signals();
 	Init_RGB_LEDs();                                                                                                                                                                                                                                                                                                                                                                                                                                             
 	Sound_Init();	

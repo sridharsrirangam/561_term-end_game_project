@@ -9735,6 +9735,8 @@ N// Event Flags for Update Screen
 N#define EV_SCORE_UPDATE (uint16_t)(0x0001)
 N#define EV_LIFE_UPDATE (uint16_t)(0x0002)
 N
+N//Event flag to trigger CPU Stat task. Will be set by read_TS task
+N#define EV_CPU_STAT_UPDATE (uint16_t)(0x0001)
 N//Event flag for Read TouchScreen
 N#define EV_TOUCH_DETECTED (uint16_t)(0x0001)
 N
@@ -9870,6 +9872,11 @@ N  lfsr =  (lfsr >> 1) | (bit << 15);
 N	return lfsr & 0x03ff;
 N}
 N
+Nuint16_t Sound_get_next_sound (int i)
+N{
+N	return (1000*i);
+N}
+N
 N// void Play_Waveform_with_DMA(uint32_t sample_period_us, uint16_t * waveform, uint32_t num_samples) {
 Nvoid Play_Waveform_with_DMA(void) {
 N	//	Init_Waveform();
@@ -9896,9 +9903,9 @@ N	os_itv_set(1000);
 X	_os_itv_set((U32)rt_itv_set,1000);
 N	
 N	while (1) {
-N		os_itv_wait();
-X		_os_itv_wait((U32)rt_itv_wait);
-N		//		os_evt_wait_and(EV_PLAYSOUND, WAIT_FOREVER); // wait for trigger
+N		//os_itv_wait();
+N				os_evt_wait_and(EV_PLAYSOUND, WAIT_FOREVER); // wait for trigger
+X				_os_evt_wait((U32)rt_evt_wait,(1),(0xffff),1); 
 N		// make a new sound every second
 N		
 N		// Hack - temporary code until voice code is added
@@ -9910,7 +9917,13 @@ N
 N__task void Task_Refill_Sound_Buffer(void) {
 X__declspec(noreturn) void Task_Refill_Sound_Buffer(void) {
 N	uint32_t i;
-N	
+N	/*
+N	uint16_t Wave[512];
+N		for (i=0; i<NUM_WAVEFORM_SAMPLES; i++)
+N	{
+N		Wave[i] = i;
+N	}
+N	*/
 N	while (1) {
 N		os_evt_wait_and(EV_REFILL_SOUND, WAIT_FOREVER); // wait for trigger
 X		_os_evt_wait((U32)rt_evt_wait,(1),(0xffff),1); 
@@ -9918,7 +9931,9 @@ N
 N		for (i=0; i<NUM_WAVEFORM_SAMPLES; i++) {
 X		for (i=0; i<(512); i++) {
 N			if (WNG_Len > 0) {
-N				Waveform[i] = Sound_Generate_Next_Sample();
+N				Waveform[i] = Sound_get_next_sound(i);
+N			//	Waveform[i] = Wave[i] ;//0x0005 & 0x03ff ;
+N				
 N				WNG_Len--;
 N			} else {
 N				Waveform[i] = MAX_DAC_CODE/2;

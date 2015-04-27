@@ -9273,6 +9273,8 @@ N// Event Flags for Update Screen
 N#define EV_SCORE_UPDATE (uint16_t)(0x0001)
 N#define EV_LIFE_UPDATE (uint16_t)(0x0002)
 N
+N//Event flag to trigger CPU Stat task. Will be set by read_TS task
+N#define EV_CPU_STAT_UPDATE (uint16_t)(0x0001)
 N//Event flag for Read TouchScreen
 N#define EV_TOUCH_DETECTED (uint16_t)(0x0001)
 N
@@ -9389,6 +9391,7 @@ L 13 "src\tasks.c" 2
 N
 N
 NU64 RA_Stack[64];
+NU64 RA2_Stack[64];
 N
 NOS_TID t_Read_TS, t_Read_Accelerometer, t_Sound_Manager, t_US,
 N							t_Refill_Sound_Buffer, t_GameStats, t_CPUStats;
@@ -9404,8 +9407,28 @@ N
 Nint16_t coin_X_pos=100;
 Nint16_t coin_Y_pos=100;
 N
-Nfloat roll=0.0;
+N//float roll=0.0;
 N
+Nextern uint32_t count_t_Read_TS,
+N        count_t_Read_Accelerometer,
+N	 			count_t_Sound_Manager,
+N				count_t_US,
+N				count_t_Refill_Sound_Buffer,
+N				count_t_GameStats,
+N				count_t_CPUStats,
+N				count_idle,
+N				count_total;
+N
+N
+N  float util_t_Read_TS=0,
+N        util_t_Read_Accelerometer=0,
+N	 			util_t_Sound_Manager=0,
+N				util_t_US=0,
+N				util_t_Refill_Sound_Buffer=0,
+N				util_t_GameStats=0,
+N				util_t_CPUStats=0,
+N				util_idle=0,
+N       	util_total=0;	
 N
 Nvoid Init_Debug_Signals(void) {
 N	// Enable clock to port B
@@ -9474,7 +9497,7 @@ N	t_GameStats 					= os_tsk_create(Task_GameStats, 6);
 X	t_GameStats 					= _os_tsk_create((U32)rt_tsk_create,Task_GameStats,6,0,0);
 N	t_CPUStats 						= os_tsk_create(Task_CPUStats,  3);
 X	t_CPUStats 						= _os_tsk_create((U32)rt_tsk_create,Task_CPUStats,3,0,0);
-N
+N// t_CPUStats 						= os_tsk_create_user(Task_CPUStats,  3, RA2_Stack,512);
 N
 N  os_tsk_delete_self ();
 X  { _os_tsk_delete((U32)rt_tsk_delete, 0); for(;;); };
@@ -9490,11 +9513,11 @@ N	os_mbx_init(&TS_mailbox,sizeof(TS_mailbox)); // number of elements being sent
 X	_os_mbx_init((U32)rt_mbx_init,&TS_mailbox,sizeof(TS_mailbox)); 
 N	
 N	
-N	Sound_Disable_Amp();
+N//	Sound_Disable_Amp();
 N	
 N	os_itv_set(TASK_READ_TS_PERIOD_TICKS);
 X	_os_itv_set((U32)rt_itv_set,(20));
-W "src\tasks.c" 89 23 function "malloc" declared implicitly
+W "src\tasks.c" 110 23 function "malloc" declared implicitly
 N	TRT_mbx_buf = (int*) malloc(sizeof(int));
 N	
 N	while (1) {
@@ -9545,8 +9568,7 @@ N	os_mbx_init(&ACCL_mailbox,sizeof(ACCL_mailbox)); // number of elements being s
 X	_os_mbx_init((U32)rt_mbx_init,&ACCL_mailbox,sizeof(ACCL_mailbox)); 
 N	
 N	
-W "src\tasks.c" 132 25 function "malloc" declared implicitly
-N	TRA_mbx_buf = (float*) malloc(sizeof(float));
+N	//TRA_mbx_buf = (float*) malloc(sizeof(float));
 N		
 N	
 N	os_itv_set(TASK_READ_ACCELEROMETER_PERIOD_TICKS);
@@ -9558,6 +9580,10 @@ X		_os_itv_wait((U32)rt_itv_wait);
 N		PTB->PSOR = MASK(DEBUG_T0_POS);
 X		((GPIO_Type *)(0x400FF040u))->PSOR = (1UL << (0));
 N		//roll = read_full_xyz();
+N		
+W "src\tasks.c" 163 26 function "malloc" declared implicitly
+N		TRA_mbx_buf = (float*) malloc(sizeof(float));
+N		
 N		*TRA_mbx_buf = read_full_xyz();
 N		
 N		
@@ -9619,10 +9645,10 @@ N																	0,1,1,1,1,1,1,1,1,0,
 N																	0,1,1,1,1,1,1,1,1,0,
 N																	1,1,1,1,1,1,1,1,1,1,
 N																	1,1,1,1,1,1,1,1,1,1,
-N																	0,1,1,1,1,1,1,1,1,0,
+N																	0,1,1,1,1,1,1,1,1,1,
 N																	0,1,1,1,1,1,1,1,1,0,
 N																	0,0,1,1,1,1,1,1,0,0,
-N																	0,0,0,0,1,1,0,0,0,0};
+N																	0,0,0,0,1,1,1,0,0,0};
 N	
 N
 N																	
@@ -9646,6 +9672,9 @@ N	while (1) {
 N		
 N		os_itv_wait();
 X		_os_itv_wait((U32)rt_itv_wait);
+N	
+N		Sound_Enable_Amp();
+N		
 N		if(os_mbx_wait(&ACCL_mailbox, (void*)&TUS_mbx_buf,0xFFFF) == OS_R_TMO)
 X		if(_os_mbx_wait((U32)rt_mbx_wait,&ACCL_mailbox,(void*)&TUS_mbx_buf,0xFFFF) == 0x01)
 N		//if(0)
@@ -9663,7 +9692,7 @@ N		}
 N		
 N		rollVal = *TUS_mbx_buf;
 N		
-W "src\tasks.c" 233 3 function "free" declared implicitly
+W "src\tasks.c" 260 3 function "free" declared implicitly
 N		free(TUS_mbx_buf);
 N		
 N	  if(os_evt_wait_and(EV_TOUCH_DETECTED,0x00)!= OS_R_TMO)
@@ -9731,6 +9760,8 @@ N					{
 N						//score+=1;
 N						os_evt_set(EV_SCORE_UPDATE,t_GameStats);
 X						_os_evt_set((U32)rt_evt_set,(uint16_t)(0x0001),t_GameStats);
+N						os_evt_set(EV_PLAYSOUND,t_Sound_Manager);
+X						_os_evt_set((U32)rt_evt_set,(1),t_Sound_Manager);
 N					}
 N					else
 N					{
@@ -9740,7 +9771,7 @@ N					}
 N			
 N					coin_Y_pos=100;
 N			
-W "src\tasks.c" 294 18 function "rand" declared implicitly
+W "src\tasks.c" 322 18 function "rand" declared implicitly
 N					coin_X_pos=(rand()) % 230;
 N				}
 N	//		TFT_Fill_Rectangle(&c1,&c2,&paddle_color);
@@ -9760,9 +9791,9 @@ N			}
 N		PTB->PCOR = MASK(DEBUG_T3_POS);
 X		((GPIO_Type *)(0x400FF040u))->PCOR = (1UL << (3));
 N	}
-W "src\tasks.c" 173 10 variable "score" was declared but never referenced
-W "src\tasks.c" 174 11 variable "life" was declared but never referenced
-W "src\tasks.c" 185 10 variable "fastFlag" was declared but never referenced
+W "src\tasks.c" 197 10 variable "score" was declared but never referenced
+W "src\tasks.c" 198 11 variable "life" was declared but never referenced
+W "src\tasks.c" 209 10 variable "fastFlag" was declared but never referenced
 N}
 N
 N__task void Task_GameStats(void)
@@ -9798,6 +9829,9 @@ N		else if(os_evt_get() == EV_SCORE_UPDATE)
 X		else if(_os_evt_get((U32)rt_evt_get) == (uint16_t)(0x0001))
 N		{
 N			++score;
+N			if(score>5)
+N			{os_evt_set(EV_CPU_STAT_UPDATE,t_CPUStats);}
+X			{_os_evt_set((U32)rt_evt_set,(uint16_t)(0x0001),t_CPUStats);}
 N			//Play_Tone();
 N		}
 N		
@@ -9820,18 +9854,65 @@ N
 N
 N__task void Task_CPUStats(void)
 X__declspec(noreturn) void Task_CPUStats(void)
-N{
+N{ 
+N	
+N	char buffer[16];
+N	
 N	int* CPUS_mbx_buf;
 N	
+N	os_itv_set(1000);
+X	_os_itv_set((U32)rt_itv_set,1000);
 N	
-N	os_mbx_wait(&TS_mailbox, (void*)&CPUS_mbx_buf,0x01);
-X	_os_mbx_wait((U32)rt_mbx_wait,&TS_mailbox,(void*)&CPUS_mbx_buf,0x01);
+N	while(1)
+N	{
+N		//os_itv_wait();
+N	os_evt_wait_and(EV_CPU_STAT_UPDATE,WAIT_FOREVER);
+X	_os_evt_wait((U32)rt_evt_wait,(uint16_t)(0x0001),(0xffff),1);
 N	
-N	roll = (float)*CPUS_mbx_buf;
+N		util_t_Read_Accelerometer = ((float)count_t_Read_Accelerometer/count_total)*100;
+N		util_t_Read_TS = ((float)count_t_Read_TS/count_total)*100;
+N		util_t_Sound_Manager=((float)count_t_Sound_Manager/count_total)*100;
+N		util_t_US=((float)count_t_US/count_total)*100;
+N		util_t_Refill_Sound_Buffer=((float)count_t_Refill_Sound_Buffer/count_total)*100;
+N		util_t_GameStats=((float)count_t_GameStats/count_total)*100;
+N		util_t_CPUStats=((float)count_t_CPUStats/count_total)*100;
+N		util_idle=((float)count_idle/count_total)*100;
+N		
+N	 //print the cpu utilisatoin values
+N
+N		sprintf(buffer, "Task name , CPU Utilsation");
+N		
+N		os_mut_wait(&LCD_mutex, WAIT_FOREVER);
+X		_os_mut_wait((U32)rt_mut_wait,&LCD_mutex,(0xffff));
+N
+N		TFT_Text_PrintStr_RC(0, 0, buffer);
+N
+N		sprintf(buffer,"read accel , %f",util_t_Read_Accelerometer);
+N    TFT_Text_PrintStr_RC(1,0,buffer);
+N
+N		sprintf(buffer,"Read TS , %f",util_t_Read_TS);
+N		TFT_Text_PrintStr_RC(2,0,buffer);
+N		sprintf(buffer,"sound mngr , %f",util_t_Sound_Manager);
+N		TFT_Text_PrintStr_RC(3,0,buffer);
+N		sprintf(buffer,"updt scrn , %f",util_t_US);
+N		TFT_Text_PrintStr_RC(4,0,buffer);
+N		sprintf(buffer,"rfll snd , %f",util_t_Refill_Sound_Buffer);
+N		TFT_Text_PrintStr_RC(5,0,buffer);
+N		sprintf(buffer,"game stats , %f",util_t_GameStats);
+N		TFT_Text_PrintStr_RC(6,0,buffer);
+N		sprintf(buffer,"idle time , %f",util_idle);
+N		TFT_Text_PrintStr_RC(7,0,buffer);
 N	
-W "src\tasks.c" 366 2 function "free" declared implicitly
+N	os_mut_release(&LCD_mutex);
+X	_os_mut_release((U32)rt_mut_release,&LCD_mutex);
+N		
+N		
+N	//os_mbx_wait(&TS_mailbox, (void*)&CPUS_mbx_buf,0x01);
+N	
+N
+N	
+W "src\tasks.c" 441 2 function "free" declared implicitly
 N	free(CPUS_mbx_buf);
-N	
-W "src\tasks.c" 368 1 function declared with "noreturn" does return
+N	}
 N}
 N

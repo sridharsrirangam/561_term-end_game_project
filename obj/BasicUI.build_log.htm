@@ -5,7 +5,7 @@
 <h2>Tool Versions:</h2>
 IDE-Version: µVision V5.13.0.0
 Copyright (C) 2014 ARM Ltd and ARM Germany GmbH. All rights reserved.
-License Information: Adeesh Gopalakrishnan, Microsoft, LIC=----
+License Information: sridhar srirangam, NCSU, LIC=----
  
 Tool Versions:
 Toolchain:       MDK-Lite  Version: 5.13.0.0
@@ -21,53 +21,32 @@ Target DLL:      CMSIS_AGDI.dll V1.20.8.0
 Dialog DLL:      TARMCM1.DLL V1.9.0.0
  
 <h2>Project:</h2>
-C:\Users\Adeesh\Downloads\ECE 561\Project 4\561_term-end_game_project\BasicUI.uvproj
-Project File Date:  04/26/2015
+Z:\srirangamsridhar On My Mac\GitHub\561_term-end_game_project\BasicUI.uvproj
+Project File Date:  04/14/2015
 
 <h2>Output:</h2>
-Rebuild target 'KL25Z Flash'
-compiling system_MKL25Z4.c...
-assembling startup_MKL25Z4.s...
-compiling main.c...
-compiling LEDs.c...
-compiling timers.c...
-compiling delay.c...
-compiling profile.c...
-compiling region.c...
-compiling lucida_8x13.c...
-compiling lucida_12x19.c...
-compiling lucida_20x31.c...
-compiling RTX_Config.c...
-compiling sound.c...
+Build target 'KL25Z Flash'
 compiling tasks.c...
-src\tasks.c(89): warning:  #223-D: function "malloc" declared implicitly
+src\tasks.c(110): warning:  #223-D: function "malloc" declared implicitly
         TRT_mbx_buf = (int*) malloc(sizeof(int));
-src\tasks.c(132): warning:  #223-D: function "malloc" declared implicitly
-        TRA_mbx_buf = (float*) malloc(sizeof(float));
-src\tasks.c(233): warning:  #223-D: function "free" declared implicitly
+src\tasks.c(163): warning:  #223-D: function "malloc" declared implicitly
+                TRA_mbx_buf = (float*) malloc(sizeof(float));
+src\tasks.c(260): warning:  #223-D: function "free" declared implicitly
                 free(TUS_mbx_buf);
-src\tasks.c(294): warning:  #223-D: function "rand" declared implicitly
+src\tasks.c(322): warning:  #223-D: function "rand" declared implicitly
                                         coin_X_pos=(rand()) % 230;
-src\tasks.c(173): warning:  #177-D: variable "score" was declared but never referenced
+src\tasks.c(197): warning:  #177-D: variable "score" was declared but never referenced
         int16_t score=0;
-src\tasks.c(174): warning:  #177-D: variable "life" was declared but never referenced
+src\tasks.c(198): warning:  #177-D: variable "life" was declared but never referenced
     int16_t life=3;
-src\tasks.c(185): warning:  #177-D: variable "fastFlag" was declared but never referenced
+src\tasks.c(209): warning:  #177-D: variable "fastFlag" was declared but never referenced
         uint8_t fastFlag,speed=5;
-src\tasks.c(366): warning:  #223-D: function "free" declared implicitly
+src\tasks.c(441): warning:  #223-D: function "free" declared implicitly
         free(CPUS_mbx_buf);
-src\tasks.c(368): warning:  #1461-D: function declared with "noreturn" does return
-  }
-src\tasks.c: 9 warnings, 0 errors
-compiling I2C.c...
-compiling DMA.c...
-compiling MMA8451.c...
-compiling TFT_graphics.c...
-compiling TFT_lcd.c...
-compiling TFT_text.c...
+src\tasks.c: 8 warnings, 0 errors
 linking...
-Program Size: Code=15988 RO-data=7592 RW-data=180 ZI-data=6676  
-".\obj\BasicUI.axf" - 0 Error(s), 9 Warning(s).
+Program Size: Code=18624 RO-data=7624 RW-data=244 ZI-data=9672  
+".\obj\BasicUI.axf" - 0 Error(s), 8 Warning(s).
 </pre>
 </body>
 </html>
