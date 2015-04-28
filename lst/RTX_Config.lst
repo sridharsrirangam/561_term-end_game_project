@@ -887,7 +887,7 @@ X__declspec(noreturn) void os_idle_demon (void) {
 N  /* The idle demon is a system task, running when no other task is ready */
 N  /* to run. The 'os_xxx' function calls are not allowed from this task.  */
 N
-N  for (;;) {
+N   for (;;) {
 N  /* HERE: include optional user code to be executed when no task runs.*/
 N  }
 N}

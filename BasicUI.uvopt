@@ -200,47 +200,57 @@
         <Ww>
           <count>9</count>
           <WinNumber>1</WinNumber>
-          <ItemText>count_t_Read_TS</ItemText>
+          <ItemText>count_t_Read_TS,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>10</count>
           <WinNumber>1</WinNumber>
-          <ItemText>count_t_Read_Accelerometer</ItemText>
+          <ItemText>count_t_Read_Accelerometer,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>11</count>
           <WinNumber>1</WinNumber>
-          <ItemText>count_t_Sound_Manager</ItemText>
+          <ItemText>count_t_Sound_Manager,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>12</count>
           <WinNumber>1</WinNumber>
-          <ItemText>count_t_US</ItemText>
+          <ItemText>count_t_US,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>13</count>
           <WinNumber>1</WinNumber>
-          <ItemText>count_t_Refill_Sound_Buffer</ItemText>
+          <ItemText>count_t_Refill_Sound_Buffer,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>14</count>
           <WinNumber>1</WinNumber>
-          <ItemText>count_t_GameStats</ItemText>
+          <ItemText>count_t_GameStats,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>15</count>
           <WinNumber>1</WinNumber>
-          <ItemText>count_t_CPUStats</ItemText>
+          <ItemText>count_t_CPUStats,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>16</count>
           <WinNumber>1</WinNumber>
-          <ItemText>count_idle</ItemText>
+          <ItemText>count_idle,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>17</count>
           <WinNumber>1</WinNumber>
-          <ItemText>count_total</ItemText>
+          <ItemText>count_total,0x0A</ItemText>
+        </Ww>
+        <Ww>
+          <count>18</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>test</ItemText>
+        </Ww>
+        <Ww>
+          <count>19</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>test2</ItemText>
         </Ww>
       </WatchWindow1>
       <WatchWindow2>
@@ -423,6 +433,16 @@
           <count>35</count>
           <WinNumber>2</WinNumber>
           <ItemText>err_code</ItemText>
+        </Ww>
+        <Ww>
+          <count>36</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>count_t_Read_Accelerometer,0x0A</ItemText>
+        </Ww>
+        <Ww>
+          <count>37</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>count_total,0x0A</ItemText>
         </Ww>
       </WatchWindow2>
       <MemoryWindow1>
