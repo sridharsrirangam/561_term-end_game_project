@@ -24,7 +24,7 @@ uint32_t count_t_Read_TS=0,
 				count_t_US=0,
 				count_t_Refill_Sound_Buffer=0,
 				count_t_GameStats=0,
-				count_t_CPUStats=0,
+				//count_t_CPUStats=0,
 				count_idle=0,
 				count_total=0;
 
@@ -67,8 +67,8 @@ void PIT_IRQHandler() {
 	{++count_t_Refill_Sound_Buffer;}
 	else if(interrupted_task==t_GameStats)
 	{++count_t_GameStats;}
-	else if(interrupted_task==t_CPUStats)
-	{++count_t_CPUStats;}
+	//else if(interrupted_task==t_CPUStats)
+	//{++count_t_CPUStats;}
 	else if(interrupted_task==0xFF)
 	{++count_idle;}
 /*

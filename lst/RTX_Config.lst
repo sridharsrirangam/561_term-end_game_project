@@ -748,7 +748,7 @@ N#endif
 N 
 L 13 "src\RTX_Config.c" 2
 N
-Nextern int test2;
+N//extern int test2;
 N
 N/*----------------------------------------------------------------------------
 N *      RTX User configuration part BEGIN

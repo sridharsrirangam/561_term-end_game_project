@@ -9202,7 +9202,7 @@ N} GLYPH_INDEX_T;
 N
 Nextern const uint8_t Lucida_Console8x13[];
 Nextern const uint8_t Lucida_Console12x19[];
-Nextern const uint8_t Lucida_Console20x31[];
+N//extern const uint8_t Lucida_Console20x31[];
 N
 N#define CHAR_WIDTH G_TFT_char_width 
 N#define CHAR_HEIGHT G_TFT_char_height 
@@ -9426,12 +9426,11 @@ XU32 ACCL_mailbox [4 + 2];
 Nos_mbx_declare(TS_mailbox,2);
 XU32 TS_mailbox [4 + 2];
 N
-Nint16_t coin_X_pos=100;
-Nint16_t coin_Y_pos=100;
+N
 N
 N//float roll=0.0;
-Nint test;
-Nint test2;
+N//int test;
+N//int test2;
 N
 Nextern uint32_t count_t_Read_TS,
 N        count_t_Read_Accelerometer,
@@ -9439,20 +9438,12 @@ N	 			count_t_Sound_Manager,
 N				count_t_US,
 N				count_t_Refill_Sound_Buffer,
 N				count_t_GameStats,
-N				count_t_CPUStats,
+N				//count_t_CPUStats,
 N				count_idle,
 N				count_total;
 N
 N
-N  float util_t_Read_TS=0,
-N        util_t_Read_Accelerometer=0,
-N	 			util_t_Sound_Manager=0,
-N				util_t_US=0,
-N				util_t_Refill_Sound_Buffer=0,
-N				util_t_GameStats=0,
-N				util_t_CPUStats=0,
-N				util_idle=0,
-N       	util_total=0;	
+N  
 N
 Nvoid Init_Debug_Signals(void) {
 N	// Enable clock to port B
@@ -9534,9 +9525,7 @@ X__declspec(noreturn) void Task_Read_TS(void) {
 N	PT_T p;
 N	int* TRT_mbx_buf;
 N	uint16_t temp_Yval;
-N	int debounce=0;
-N	int flag=0;
-N	int stat_or_restart=0; // 0 for stat
+N	int debounce=0,flag=0,stat_or_restart=0; // 0 for stat
 N	
 N	os_mbx_init(&TS_mailbox,sizeof(TS_mailbox)); // number of elements being sent
 X	_os_mbx_init((U32)rt_mbx_init,&TS_mailbox,sizeof(TS_mailbox)); 
@@ -9576,7 +9565,7 @@ X			else if(_os_evt_get((U32)rt_evt_get) == (uint16_t)(0x0002))
 N			{
 N				stat_or_restart=1;
 N			}
-N			test2=stat_or_restart;
+N			//test2=stat_or_restart;
 N		}
 N		
 N			if(debounce>0)
@@ -9596,7 +9585,7 @@ N				else
 N				{// send mailbox
 N					
 N				if(!flag){	
-W "src\tasks.c" 165 27 function "malloc" declared implicitly
+W "src\tasks.c" 154 27 function "malloc" declared implicitly
 N					TRT_mbx_buf = (int*) malloc(sizeof(int));
 N					*TRT_mbx_buf = (int)temp_Yval;
 N					if(os_mbx_check(&TS_mailbox)!=0)
@@ -9645,7 +9634,7 @@ N}
 N//-------------------------------------------------------------------
 N__task void Task_Read_Accelerometer(void) {
 X__declspec(noreturn) void Task_Read_Accelerometer(void) {
-N	char buffer[16];
+N	//char buffer[16];
 N	
 N	//buffer to send data using a mailbox
 N	float* TRA_mbx_buf;
@@ -9654,9 +9643,6 @@ N	//------------------------------------------------------------
 N	
 N	os_mbx_init(&ACCL_mailbox,sizeof(ACCL_mailbox)); // number of elements being sent
 X	_os_mbx_init((U32)rt_mbx_init,&ACCL_mailbox,sizeof(ACCL_mailbox)); 
-N	
-N	
-N	//TRA_mbx_buf = (float*) malloc(sizeof(float));
 N		
 N	
 N	os_itv_set(TASK_READ_ACCELEROMETER_PERIOD_TICKS);
@@ -9672,28 +9658,15 @@ X		((GPIO_Type *)(0x400FF040u))->PSOR = (1UL << (0));
 N		//roll = read_full_xyz();
 N		
 N		
-W "src\tasks.c" 230 26 function "malloc" declared implicitly
+W "src\tasks.c" 216 26 function "malloc" declared implicitly
 N		TRA_mbx_buf = (float*) malloc(sizeof(float));
 N		
 N		*TRA_mbx_buf = read_full_xyz();
 N		
-N		
-N		 
-N		
 N		// send with maximum timeout less than infinity
-N		if((os_mbx_send(&ACCL_mailbox,TRA_mbx_buf,0xFFFF)) != OS_R_OK)
-X		if((_os_mbx_send((U32)rt_mbx_send,&ACCL_mailbox,TRA_mbx_buf,0xFFFF)) != 0x00)
-N	  //if(0)
-N		{
-N			sprintf(buffer, "Error in MBX Send!!");
-N			os_mut_wait(&LCD_mutex, WAIT_FOREVER);
-X			_os_mut_wait((U32)rt_mut_wait,&LCD_mutex,(0xffff));
-N			TFT_Text_PrintStr_RC(TFT_MAX_ROWS-5, 3, buffer);
-X			TFT_Text_PrintStr_RC(((320)/G_TFT_char_height)-5, 3, buffer);
-N			os_mut_release(&LCD_mutex);
-X			_os_mut_release((U32)rt_mut_release,&LCD_mutex);
-N			//while(1); // only for debugging
-N		}			
+N		os_mbx_send(&ACCL_mailbox,TRA_mbx_buf,0xFFFF);
+X		_os_mbx_send((U32)rt_mbx_send,&ACCL_mailbox,TRA_mbx_buf,0xFFFF);
+N	  			
 N		
 N		//convert_xyz_to_roll_pitch();
 N#if 0
@@ -9718,6 +9691,9 @@ N	//int16_t coin_pos=100;
 N	//int16_t score=0;
 N  //int16_t life=3;
 N	
+N	int16_t coin_X_pos=100;
+N	int16_t coin_Y_pos=100;
+N	
 N	PT_T p1, p2,c1,c2,d1;
 N	COLOR_T paddle_color, black,coin_color;
 N	char buffer[16];
@@ -9728,11 +9704,11 @@ N	//For mailboxes
 N	float *TUS_mbx_buf;// for Accel
 N	float rollVal;
 N	
-N	uint8_t fastFlag,speed=5;
+N	uint8_t speed=5;
 N	
 N	
 N	
-N	int8_t array_number [10][10] = {0,0,0,1,1,1,0,0,0,0,
+N	const int8_t array_number [10][10] = {0,0,0,1,1,1,0,0,0,0,
 N																	0,0,1,1,1,1,1,1,0,0,
 N																	0,1,1,1,1,1,1,1,1,0,
 N																	0,1,1,1,1,1,1,1,1,0,
@@ -9789,7 +9765,7 @@ N				paddle_pos=TFT_WIDTH/2;
 X				paddle_pos=(240)/2;
 N				
 N				coin_Y_pos=100;
-W "src\tasks.c" 333 17 function "rand" declared implicitly
+W "src\tasks.c" 312 17 function "rand" declared implicitly
 N				coin_X_pos=(rand()) % 230;
 N			}
 N			
@@ -9802,24 +9778,14 @@ N		//Sound_Enable_Amp();
 N		
 N		//test2=os_mbx_check(&ACCL_mailbox);
 N		
-N		if(os_mbx_wait(&ACCL_mailbox, (void*)&TUS_mbx_buf,0xFFFF) == OS_R_TMO)
-X		if(_os_mbx_wait((U32)rt_mbx_wait,&ACCL_mailbox,(void*)&TUS_mbx_buf,0xFFFF) == 0x01)
+N		os_mbx_wait(&ACCL_mailbox, (void*)&TUS_mbx_buf,0xFFFF);
+X		_os_mbx_wait((U32)rt_mbx_wait,&ACCL_mailbox,(void*)&TUS_mbx_buf,0xFFFF);
 N		//if(0)
-N		{ 
-N			sprintf(buffer, "Error in MBX Receive!!");
-N			os_mut_wait(&LCD_mutex, WAIT_FOREVER);
-X			_os_mut_wait((U32)rt_mut_wait,&LCD_mutex,(0xffff));
-N			TFT_Text_PrintStr_RC(TFT_MAX_ROWS - 8, 4, buffer);
-X			TFT_Text_PrintStr_RC(((320)/G_TFT_char_height) - 8, 4, buffer);
-N			os_mut_release(&LCD_mutex);
-X			_os_mut_release((U32)rt_mut_release,&LCD_mutex);
-N			//while(1); // only for debugging
-N			
-N		}
+N		
 N		
 N		rollVal = *TUS_mbx_buf;
 N		
-W "src\tasks.c" 358 3 function "free" declared implicitly
+W "src\tasks.c" 330 3 function "free" declared implicitly
 N		free(TUS_mbx_buf);
 N		
 N		
@@ -9902,7 +9868,7 @@ N					}
 N			
 N					coin_Y_pos=100;
 N			
-W "src\tasks.c" 424 18 function "rand" declared implicitly
+W "src\tasks.c" 396 18 function "rand" declared implicitly
 N					coin_X_pos=(rand()) % 230;
 N				}
 N	//		TFT_Fill_Rectangle(&c1,&c2,&paddle_color);
@@ -9925,7 +9891,7 @@ N		PTB->PCOR = MASK(DEBUG_T3_POS);
 X		((GPIO_Type *)(0x400FF040u))->PCOR = (1UL << (3));
 N		}// flag
 N	}//while(1)
-W "src\tasks.c" 278 10 variable "fastFlag" was declared but never referenced
+W "src\tasks.c" 249 7 variable "buffer" was declared but never referenced
 N}
 N
 N
@@ -9933,11 +9899,20 @@ N
 N__task void Task_CPUStats(void)
 X__declspec(noreturn) void Task_CPUStats(void)
 N{ 
-N	
 N	char buffer[16];
 N	int y_pos;
 N	int* CPUS_mbx_buf;
-N	int iter;
+N	//int iter;
+N	
+N	float util_t_Read_TS=0,
+N        util_t_Read_Accelerometer=0,
+N	 			util_t_Sound_Manager=0,
+N				util_t_US=0,
+N				util_t_Refill_Sound_Buffer=0,
+N				util_t_GameStats=0,
+N				//util_t_CPUStats=0,
+N				util_idle=0,
+N       	util_total=0;	
 N	
 N	os_itv_set(1000);
 X	_os_itv_set((U32)rt_itv_set,1000);
@@ -9958,7 +9933,7 @@ N
 N		//test2=y_pos;
 N		
 N		
-W "src\tasks.c" 473 3 function "free" declared implicitly
+W "src\tasks.c" 454 3 function "free" declared implicitly
 N		free(CPUS_mbx_buf);
 N		
 N		//test=os_mbx_check(&ACCL_mailbox);
@@ -9969,19 +9944,16 @@ N		//TFT_Erase();
 N		
 N  	 if(y_pos<50)
 N		 {
-N			 //while(os_evt_wait_and(EV_END_CPU_STAT,0x0000)!=OS_R_OK)
-N			// {
-N       //os_mbx_wait(&TS_mailbox, (void*)&CPUS_mbx_buf,0xffff);			
-N			 
-N				//y_pos= *CPUS_mbx_buf;
-N				// test=y_pos;
-N					os_tsk_prio_self(8);
-X					_os_tsk_prio((U32)rt_tsk_prio,0,8);
+N
+N					
 N				//os_tsk_prio(t_Read_TS,9);
 N				// tsk_lock();
+N					
+N				//	os_mut_wait(&PAUSE_GAME_mutex,WAIT_FOREVER);
+N					os_tsk_prio_self(8);
+X					_os_tsk_prio((U32)rt_tsk_prio,0,8);
 N					os_evt_set(EV_CPU_STAT_DISP,t_US);
 X					_os_evt_set((U32)rt_evt_set,(uint16_t)(0x0004),t_US);
-N				//	os_mut_wait(&PAUSE_GAME_mutex,WAIT_FOREVER);
 N					os_evt_set(EV_RECD_CPU_STAT,t_Read_TS);
 X					_os_evt_set((U32)rt_evt_set,(uint16_t)(0x0001),t_Read_TS);
 N			 
@@ -10068,7 +10040,7 @@ N
 N	
 N	//free(CPUS_mbx_buf);
 N	}
-W "src\tasks.c" 455 6 variable "iter" was declared but never referenced
+W "src\tasks.c" 436 9 variable "util_total" was declared but never referenced
 N}// CPU Stats Task
 N
 N__task void Task_GameStats(void)
@@ -10095,12 +10067,10 @@ N				sprintf(buffer, "Score: %d", score);
 N				os_mut_wait(&LCD_mutex, WAIT_FOREVER);
 X				_os_mut_wait((U32)rt_mut_wait,&LCD_mutex,(0xffff));
 N				TFT_Text_PrintStr_RC(0, 0, buffer);
-N				os_mut_release(&LCD_mutex);
-X				_os_mut_release((U32)rt_mut_release,&LCD_mutex);
+N				//os_mut_release(&LCD_mutex);
 N
 N				sprintf(buffer, "Life : %d", life);
-N				os_mut_wait(&LCD_mutex, WAIT_FOREVER);
-X				_os_mut_wait((U32)rt_mut_wait,&LCD_mutex,(0xffff));
+N				//os_mut_wait(&LCD_mutex, WAIT_FOREVER);
 N				TFT_Text_PrintStr_RC(1, 0, buffer);
 N				os_mut_release(&LCD_mutex);
 X				_os_mut_release((U32)rt_mut_release,&LCD_mutex);
@@ -10112,12 +10082,10 @@ N				sprintf(buffer, "Score: %d", score);
 N				os_mut_wait(&LCD_mutex, WAIT_FOREVER);
 X				_os_mut_wait((U32)rt_mut_wait,&LCD_mutex,(0xffff));
 N				TFT_Text_PrintStr_RC(0, 0, buffer);
-N				os_mut_release(&LCD_mutex);
-X				_os_mut_release((U32)rt_mut_release,&LCD_mutex);
+N				//os_mut_release(&LCD_mutex);
 N
 N				sprintf(buffer, "Life : %d", life);
-N				os_mut_wait(&LCD_mutex, WAIT_FOREVER);
-X				_os_mut_wait((U32)rt_mut_wait,&LCD_mutex,(0xffff));
+N				//os_mut_wait(&LCD_mutex, WAIT_FOREVER);
 N				TFT_Text_PrintStr_RC(1, 0, buffer);
 N				os_mut_release(&LCD_mutex);
 X				_os_mut_release((U32)rt_mut_release,&LCD_mutex);
@@ -10160,12 +10128,10 @@ N			sprintf(buffer, "Score: %d", score);
 N			os_mut_wait(&LCD_mutex, WAIT_FOREVER);
 X			_os_mut_wait((U32)rt_mut_wait,&LCD_mutex,(0xffff));
 N			TFT_Text_PrintStr_RC(0, 0, buffer);
-N			os_mut_release(&LCD_mutex);
-X			_os_mut_release((U32)rt_mut_release,&LCD_mutex);
+N			//os_mut_release(&LCD_mutex);
 N
 N			sprintf(buffer, "Life : %d", life);
-N			os_mut_wait(&LCD_mutex, WAIT_FOREVER);
-X			_os_mut_wait((U32)rt_mut_wait,&LCD_mutex,(0xffff));
+N			//os_mut_wait(&LCD_mutex, WAIT_FOREVER);
 N			TFT_Text_PrintStr_RC(1, 0, buffer);
 N			os_mut_release(&LCD_mutex);
 X			_os_mut_release((U32)rt_mut_release,&LCD_mutex);

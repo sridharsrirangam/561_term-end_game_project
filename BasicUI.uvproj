@@ -505,11 +505,6 @@
               <FilePath>.\src\lucida_12x19.c</FilePath>
             </File>
             <File>
-              <FileName>lucida_20x31.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\src\lucida_20x31.c</FilePath>
-            </File>
-            <File>
               <FileName>RTX_Config.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\src\RTX_Config.c</FilePath>

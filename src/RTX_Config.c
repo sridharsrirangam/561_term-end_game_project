@@ -11,7 +11,7 @@
 
 #include <RTL.h>
 
-extern int test2;
+//extern int test2;
 
 /*----------------------------------------------------------------------------
  *      RTX User configuration part BEGIN

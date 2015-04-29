@@ -28,12 +28,11 @@ OS_MBX TS_mailbox;
 os_mbx_declare(ACCL_mailbox,2);
 os_mbx_declare(TS_mailbox,2);
 
-int16_t coin_X_pos=100;
-int16_t coin_Y_pos=100;
+
 
 //float roll=0.0;
-int test;
-int test2;
+//int test;
+//int test2;
 
 extern uint32_t count_t_Read_TS,
         count_t_Read_Accelerometer,
@@ -41,20 +40,12 @@ extern uint32_t count_t_Read_TS,
 				count_t_US,
 				count_t_Refill_Sound_Buffer,
 				count_t_GameStats,
-				count_t_CPUStats,
+				//count_t_CPUStats,
 				count_idle,
 				count_total;
 
 
-  float util_t_Read_TS=0,
-        util_t_Read_Accelerometer=0,
-	 			util_t_Sound_Manager=0,
-				util_t_US=0,
-				util_t_Refill_Sound_Buffer=0,
-				util_t_GameStats=0,
-				util_t_CPUStats=0,
-				util_idle=0,
-       	util_total=0;	
+  
 
 void Init_Debug_Signals(void) {
 	// Enable clock to port B
@@ -108,9 +99,7 @@ __task void Task_Read_TS(void) {
 	PT_T p;
 	int* TRT_mbx_buf;
 	uint16_t temp_Yval;
-	int debounce=0;
-	int flag=0;
-	int stat_or_restart=0; // 0 for stat
+	int debounce=0,flag=0,stat_or_restart=0; // 0 for stat
 	
 	os_mbx_init(&TS_mailbox,sizeof(TS_mailbox)); // number of elements being sent
 	
@@ -143,7 +132,7 @@ __task void Task_Read_TS(void) {
 			{
 				stat_or_restart=1;
 			}
-			test2=stat_or_restart;
+			//test2=stat_or_restart;
 		}
 		
 			if(debounce>0)
@@ -204,7 +193,7 @@ __task void Task_Read_TS(void) {
 }
 //-------------------------------------------------------------------
 __task void Task_Read_Accelerometer(void) {
-	char buffer[16];
+	//char buffer[16];
 	
 	//buffer to send data using a mailbox
 	float* TRA_mbx_buf;
@@ -212,9 +201,6 @@ __task void Task_Read_Accelerometer(void) {
 	//------------------------------------------------------------
 	
 	os_mbx_init(&ACCL_mailbox,sizeof(ACCL_mailbox)); // number of elements being sent
-	
-	
-	//TRA_mbx_buf = (float*) malloc(sizeof(float));
 		
 	
 	os_itv_set(TASK_READ_ACCELEROMETER_PERIOD_TICKS);
@@ -231,19 +217,9 @@ __task void Task_Read_Accelerometer(void) {
 		
 		*TRA_mbx_buf = read_full_xyz();
 		
-		
-		 
-		
 		// send with maximum timeout less than infinity
-		if((os_mbx_send(&ACCL_mailbox,TRA_mbx_buf,0xFFFF)) != OS_R_OK)
-	  //if(0)
-		{
-			sprintf(buffer, "Error in MBX Send!!");
-			os_mut_wait(&LCD_mutex, WAIT_FOREVER);
-			TFT_Text_PrintStr_RC(TFT_MAX_ROWS-5, 3, buffer);
-			os_mut_release(&LCD_mutex);
-			//while(1); // only for debugging
-		}			
+		os_mbx_send(&ACCL_mailbox,TRA_mbx_buf,0xFFFF);
+	  			
 		
 		//convert_xyz_to_roll_pitch();
 #if 0
@@ -265,6 +241,9 @@ __task void Task_Update_Screen(void) {
 	//int16_t score=0;
   //int16_t life=3;
 	
+	int16_t coin_X_pos=100;
+	int16_t coin_Y_pos=100;
+	
 	PT_T p1, p2,c1,c2,d1;
 	COLOR_T paddle_color, black,coin_color;
 	char buffer[16];
@@ -275,11 +254,11 @@ __task void Task_Update_Screen(void) {
 	float *TUS_mbx_buf;// for Accel
 	float rollVal;
 	
-	uint8_t fastFlag,speed=5;
+	uint8_t speed=5;
 	
 	
 	
-	int8_t array_number [10][10] = {0,0,0,1,1,1,0,0,0,0,
+	const int8_t array_number [10][10] = {0,0,0,1,1,1,0,0,0,0,
 																	0,0,1,1,1,1,1,1,0,0,
 																	0,1,1,1,1,1,1,1,1,0,
 																	0,1,1,1,1,1,1,1,1,0,
@@ -342,16 +321,9 @@ __task void Task_Update_Screen(void) {
 		
 		//test2=os_mbx_check(&ACCL_mailbox);
 		
-		if(os_mbx_wait(&ACCL_mailbox, (void*)&TUS_mbx_buf,0xFFFF) == OS_R_TMO)
+		os_mbx_wait(&ACCL_mailbox, (void*)&TUS_mbx_buf,0xFFFF);
 		//if(0)
-		{ 
-			sprintf(buffer, "Error in MBX Receive!!");
-			os_mut_wait(&LCD_mutex, WAIT_FOREVER);
-			TFT_Text_PrintStr_RC(TFT_MAX_ROWS - 8, 4, buffer);
-			os_mut_release(&LCD_mutex);
-			//while(1); // only for debugging
-			
-		}
+		
 		
 		rollVal = *TUS_mbx_buf;
 		
@@ -448,11 +420,20 @@ __task void Task_Update_Screen(void) {
 
 __task void Task_CPUStats(void)
 { 
-	
 	char buffer[16];
 	int y_pos;
 	int* CPUS_mbx_buf;
-	int iter;
+	//int iter;
+	
+	float util_t_Read_TS=0,
+        util_t_Read_Accelerometer=0,
+	 			util_t_Sound_Manager=0,
+				util_t_US=0,
+				util_t_Refill_Sound_Buffer=0,
+				util_t_GameStats=0,
+				//util_t_CPUStats=0,
+				util_idle=0,
+       	util_total=0;	
 	
 	os_itv_set(1000);
 	
@@ -480,17 +461,14 @@ __task void Task_CPUStats(void)
 		
   	 if(y_pos<50)
 		 {
-			 //while(os_evt_wait_and(EV_END_CPU_STAT,0x0000)!=OS_R_OK)
-			// {
-       //os_mbx_wait(&TS_mailbox, (void*)&CPUS_mbx_buf,0xffff);			
-			 
-				//y_pos= *CPUS_mbx_buf;
-				// test=y_pos;
-					os_tsk_prio_self(8);
+
+					
 				//os_tsk_prio(t_Read_TS,9);
 				// tsk_lock();
-					os_evt_set(EV_CPU_STAT_DISP,t_US);
+					
 				//	os_mut_wait(&PAUSE_GAME_mutex,WAIT_FOREVER);
+					os_tsk_prio_self(8);
+					os_evt_set(EV_CPU_STAT_DISP,t_US);
 					os_evt_set(EV_RECD_CPU_STAT,t_Read_TS);
 			 
 					TFT_Erase();
@@ -592,10 +570,10 @@ __task void Task_GameStats(void)
 				sprintf(buffer, "Score: %d", score);
 				os_mut_wait(&LCD_mutex, WAIT_FOREVER);
 				TFT_Text_PrintStr_RC(0, 0, buffer);
-				os_mut_release(&LCD_mutex);
+				//os_mut_release(&LCD_mutex);
 
 				sprintf(buffer, "Life : %d", life);
-				os_mut_wait(&LCD_mutex, WAIT_FOREVER);
+				//os_mut_wait(&LCD_mutex, WAIT_FOREVER);
 				TFT_Text_PrintStr_RC(1, 0, buffer);
 				os_mut_release(&LCD_mutex);
 			}
@@ -605,10 +583,10 @@ __task void Task_GameStats(void)
 				sprintf(buffer, "Score: %d", score);
 				os_mut_wait(&LCD_mutex, WAIT_FOREVER);
 				TFT_Text_PrintStr_RC(0, 0, buffer);
-				os_mut_release(&LCD_mutex);
+				//os_mut_release(&LCD_mutex);
 
 				sprintf(buffer, "Life : %d", life);
-				os_mut_wait(&LCD_mutex, WAIT_FOREVER);
+				//os_mut_wait(&LCD_mutex, WAIT_FOREVER);
 				TFT_Text_PrintStr_RC(1, 0, buffer);
 				os_mut_release(&LCD_mutex);
 				
@@ -641,10 +619,10 @@ __task void Task_GameStats(void)
 			sprintf(buffer, "Score: %d", score);
 			os_mut_wait(&LCD_mutex, WAIT_FOREVER);
 			TFT_Text_PrintStr_RC(0, 0, buffer);
-			os_mut_release(&LCD_mutex);
+			//os_mut_release(&LCD_mutex);
 
 			sprintf(buffer, "Life : %d", life);
-			os_mut_wait(&LCD_mutex, WAIT_FOREVER);
+			//os_mut_wait(&LCD_mutex, WAIT_FOREVER);
 			TFT_Text_PrintStr_RC(1, 0, buffer);
 			os_mut_release(&LCD_mutex);
 		}

@@ -9,7 +9,6 @@
 ".\obj\region.o"
 ".\obj\lucida_8x13.o"
 ".\obj\lucida_12x19.o"
-".\obj\lucida_20x31.o"
 ".\obj\rtx_config.o"
 ".\obj\sound.o"
 ".\obj\tasks.o"

@@ -8481,7 +8481,7 @@ N} GLYPH_INDEX_T;
 N
 Nextern const uint8_t Lucida_Console8x13[];
 Nextern const uint8_t Lucida_Console12x19[];
-Nextern const uint8_t Lucida_Console20x31[];
+N//extern const uint8_t Lucida_Console20x31[];
 N
 N#define CHAR_WIDTH G_TFT_char_width 
 N#define CHAR_HEIGHT G_TFT_char_height 
@@ -10982,7 +10982,7 @@ N  MAIN function
 N *----------------------------------------------------------------------------*/
 Nint main (void) {
 N
-N	char buffer[16];
+N	//char buffer[16];
 N	//
 N	PIT_Init(2399); // 24 MHz/(23999+1) = 1000 samples per second
 N	PIT_Start();
@@ -10997,10 +10997,10 @@ N	TFT_Init();
 N	TFT_Text_Init(1);
 N	TFT_Erase();
 N	//TFT_Text_PrintStr_RC(0,0, "Test Code");
-N	sprintf(buffer, "Score: 0");
-N	TFT_Text_PrintStr_RC(0, 0, buffer);
-N	sprintf(buffer, "Life : 3");
-N	TFT_Text_PrintStr_RC(1, 0, buffer);
+N	//sprintf(buffer, "Score: 0");
+N	TFT_Text_PrintStr_RC(0, 0,"Score: 0");
+N	//sprintf(buffer, "Life : 3");
+N	TFT_Text_PrintStr_RC(1, 0, "Life : 3");
 N
 N/*
 N	Graphics_Test();
