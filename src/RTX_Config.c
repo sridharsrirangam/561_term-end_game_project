@@ -11,6 +11,8 @@
 
 #include <RTL.h>
 
+extern int test2;
+
 /*----------------------------------------------------------------------------
  *      RTX User configuration part BEGIN
  *---------------------------------------------------------------------------*/
@@ -24,7 +26,7 @@
 //   <i> Define max. number of tasks that will run at the same time.
 //   <i> Default: 6
 #ifndef OS_TASKCNT
- #define OS_TASKCNT     10
+ #define OS_TASKCNT     12
 #endif
 
 //   <o>Number of tasks with user-provided stack <0-250>
@@ -189,7 +191,7 @@ void os_error (U32 err_code) {
   /* 'err_code' holds the runtime error code (defined in RTL.H).         */
 
   /* HERE: include optional code to be executed on runtime error. */
- 
+	//test2 = err_code;
 	
 	for (;;);
 }

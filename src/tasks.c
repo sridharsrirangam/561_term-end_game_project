@@ -17,9 +17,10 @@ U64 RA2_Stack[64];
 
 OS_TID t_Read_TS, t_Read_Accelerometer, t_Sound_Manager, t_US,
 							t_Refill_Sound_Buffer, t_GameStats, t_CPUStats;
+							
 OS_MUT LCD_mutex;
-OS_MUT TS_mutex;
-OS_MUT PAUSE_GAME_mutex;
+//OS_MUT TS_mutex;
+//OS_MUT PAUSE_GAME_mutex;
 
 
 OS_MBX ACCL_mailbox;
@@ -84,10 +85,8 @@ void Init_Debug_Signals(void) {
 
 __task void Task_Init(void) {
 	
-	
-	
 	os_mut_init(&LCD_mutex);
-	os_mut_init(&PAUSE_GAME_mutex);
+	//os_mut_init(&PAUSE_GAME_mutex);
 	
 	
 	t_Read_TS 						= os_tsk_create(Task_Read_TS, 5);
@@ -97,6 +96,9 @@ __task void Task_Init(void) {
 	t_Refill_Sound_Buffer = os_tsk_create(Task_Refill_Sound_Buffer, 1);
 	t_GameStats 					= os_tsk_create(Task_GameStats, 6);
 	t_CPUStats 						= os_tsk_create(Task_CPUStats,  3);
+	
+	
+	
 // t_CPUStats 						= os_tsk_create_user(Task_CPUStats,  3, RA2_Stack,512);
 
   os_tsk_delete_self ();
@@ -107,8 +109,10 @@ __task void Task_Read_TS(void) {
 	int* TRT_mbx_buf;
 	uint16_t temp_Yval;
 	int debounce=0;
+	int flag=0;
+	int stat_or_restart=0; // 0 for stat
 	
-	//os_mbx_init(&TS_mailbox,sizeof(TS_mailbox)); // number of elements being sent
+	os_mbx_init(&TS_mailbox,sizeof(TS_mailbox)); // number of elements being sent
 	
 	
 //	Sound_Disable_Amp();
@@ -127,6 +131,21 @@ __task void Task_Read_TS(void) {
 		
 	//	if(os_evt_wait_and(EV_RECD_CPU_STAT,0x00)==OS_R_TMO)
 //		{
+		
+		if(os_evt_wait_or((EV_GAME_OVER_TS |EV_RECD_CPU_STAT),0x00) !=OS_R_TMO)
+		{ 
+			flag=1;
+			if(os_evt_get() == EV_RECD_CPU_STAT)
+			{
+				stat_or_restart =0;
+			}
+			else if(os_evt_get() == EV_GAME_OVER_TS)
+			{
+				stat_or_restart=1;
+			}
+			test2=stat_or_restart;
+		}
+		
 			if(debounce>0)
 				--debounce;
 			
@@ -141,26 +160,35 @@ __task void Task_Read_TS(void) {
 				}
 				else
 				{// send mailbox
-					//*TRT_mbx_buf = (int)temp_Yval;
-					//os_mbx_send(&TS_mailbox,TRT_mbx_buf,0xFFFF);
-					//os_evt_set(EV_CPU_STAT_UPDATE,t_CPUStats);
-					//temp_Yval = 0;
-				}
-				//roll = p.Y;
-				//test=temp_Yval;
-				//test = temp_Yval;
-				//*TRT_mbx_buf = test;
-				//free(TRT_mbx_buf);
-				TRT_mbx_buf = (int*) malloc(sizeof(int));
-				*TRT_mbx_buf = (int)temp_Yval;
-				os_mbx_send(&TS_mailbox,TRT_mbx_buf,0x0);
+					
+				if(!flag){	
+					TRT_mbx_buf = (int*) malloc(sizeof(int));
+					*TRT_mbx_buf = (int)temp_Yval;
+					if(os_mbx_check(&TS_mailbox)!=0)
+					{
+						os_mbx_send(&TS_mailbox,TRT_mbx_buf,0x0);
+					}
+				} //!flag
+				}// >=50
 				
-				if(os_evt_wait_and(EV_RECD_CPU_STAT,0x00) !=OS_R_TMO)
-				{ 
-					test=100;
-					os_evt_set(EV_CPU_STAT_DONE,t_CPUStats);
-					//while(1);
+				if(flag)
+				{
+					if(!stat_or_restart)
+					{
+						os_evt_set(EV_CPU_STAT_DONE,t_CPUStats);
+						stat_or_restart = 0;
+					}
+					else if(stat_or_restart)
+					{
+						//os_evt_set(EV_RESTART_GAME, t_GameStats);
+						os_evt_set(EV_RESTART_GAME_UPD, t_US);
+						stat_or_restart = 0;
+						TFT_Erase();
+					}
+					
+					flag=0;// set it back to 0
 				}
+				
 			}//if touch
 	/*	}
 //		else
@@ -234,8 +262,8 @@ __task void Task_Read_Accelerometer(void) {
 __task void Task_Update_Screen(void) {
 	int16_t paddle_pos=TFT_WIDTH/2;
 	//int16_t coin_pos=100;
-	int16_t score=0;
-  int16_t life=3;
+	//int16_t score=0;
+  //int16_t life=3;
 	
 	PT_T p1, p2,c1,c2,d1;
 	COLOR_T paddle_color, black,coin_color;
@@ -285,22 +313,34 @@ __task void Task_Update_Screen(void) {
 		os_itv_wait();
 		
 		
-		if(os_evt_wait_and(EV_CPU_STAT_DISP,0x00)!= OS_R_TMO)
+		if(os_evt_wait_or((EV_GAME_OVER_UPD | EV_CPU_STAT_DISP),0x00)!= OS_R_TMO)
 		{// wait here until the CPU stats is done dispaying
 			flag = 0;
 		}
 		
-		if(os_evt_wait_and(EV_CPU_STAT_DONE,0x00) != OS_R_TMO)
+		if(os_evt_wait_or(( EV_RESTART_GAME_UPD | EV_CPU_STAT_DONE),0x00) != OS_R_TMO)
 		{
 			flag = 1;
+			
+			if(os_evt_get() == EV_RESTART_GAME_UPD)
+			{
+				TFT_Erase();
+				TFT_Text_PrintStr_RC(0, 0, "Score: 0");
+				TFT_Text_PrintStr_RC(1, 0, "Life : 3");
+				paddle_pos=TFT_WIDTH/2;
+				
+				coin_Y_pos=100;
+				coin_X_pos=(rand()) % 230;
+			}
+			
 		}
 		
 		if(flag)
 		{
 	
-		Sound_Enable_Amp();
+		//Sound_Enable_Amp();
 		
-		
+		//test2=os_mbx_check(&ACCL_mailbox);
 		
 		if(os_mbx_wait(&ACCL_mailbox, (void*)&TUS_mbx_buf,0xFFFF) == OS_R_TMO)
 		//if(0)
@@ -316,6 +356,8 @@ __task void Task_Update_Screen(void) {
 		rollVal = *TUS_mbx_buf;
 		
 		free(TUS_mbx_buf);
+		
+		
 		
 		
 		
@@ -347,8 +389,8 @@ __task void Task_Update_Screen(void) {
 		}		
 			TFT_Fill_Rectangle(&c1, &c2, &black);
 		
-			c1.X = coin_X_pos;
-			c1.Y=coin_Y_pos;
+			c1.X=	coin_X_pos;
+			c1.Y=	coin_Y_pos;
 			c2.X= coin_X_pos+COIN_RADIUS;
 			c2.Y= coin_Y_pos+COIN_RADIUS;
 		
@@ -402,50 +444,6 @@ __task void Task_Update_Screen(void) {
 	}//while(1)
 }
 
-__task void Task_GameStats(void)
-{
-	char buffer[16];
-	uint16_t score=0;
-	uint8_t life=3;
-	
-	
-	while(1)
-	{
-		
-		os_evt_wait_or((EV_LIFE_UPDATE|EV_SCORE_UPDATE), WAIT_FOREVER);
-		
-		if(os_evt_get() == EV_LIFE_UPDATE)
-		{
-			if(life!=0)
-			{
-				--life;
-			}
-			else
-			{
-				TFT_Text_PrintStr_RC(TFT_MAX_ROWS-4, 4, "Game Over");
-				TFT_Text_PrintStr_RC(TFT_MAX_ROWS-3, 4, "Press Reset");
-				while(1);
-			}
-		}
-		else if(os_evt_get() == EV_SCORE_UPDATE)
-		{
-			++score;
-		/*	if(score>5)
-			{os_evt_set(EV_CPU_STAT_UPDATE,t_CPUStats);}*/
-			//Play_Tone();
-		}
-		
-		sprintf(buffer, "Score: %d", score);
-		os_mut_wait(&LCD_mutex, WAIT_FOREVER);
-		TFT_Text_PrintStr_RC(0, 0, buffer);
-		os_mut_release(&LCD_mutex);
-
-		sprintf(buffer, "Life: %d", life);
-		os_mut_wait(&LCD_mutex, WAIT_FOREVER);
-		TFT_Text_PrintStr_RC(1, 0, buffer);
-		os_mut_release(&LCD_mutex);
-	}
-}
 
 
 __task void Task_CPUStats(void)
@@ -463,6 +461,7 @@ __task void Task_CPUStats(void)
 		os_itv_wait();
 	//os_evt_wait_and(EV_CPU_STAT_UPDATE,WAIT_FOREVER);
 		
+		
 	  os_mbx_wait(&TS_mailbox, (void*)&CPUS_mbx_buf,0xffff);
 	  
 		
@@ -470,7 +469,11 @@ __task void Task_CPUStats(void)
 	
 		//test2=y_pos;
 		
+		
 		free(CPUS_mbx_buf);
+		
+		//test=os_mbx_check(&ACCL_mailbox);
+		
     //test=y_pos;
 		//y_pos = 51;
 		//TFT_Erase();
@@ -483,10 +486,10 @@ __task void Task_CPUStats(void)
 			 
 				//y_pos= *CPUS_mbx_buf;
 				// test=y_pos;
-				os_tsk_prio_self(8);
+					os_tsk_prio_self(8);
 				//os_tsk_prio(t_Read_TS,9);
 				// tsk_lock();
-				os_evt_set(EV_CPU_STAT_DISP,t_US);
+					os_evt_set(EV_CPU_STAT_DISP,t_US);
 				//	os_mut_wait(&PAUSE_GAME_mutex,WAIT_FOREVER);
 					os_evt_set(EV_RECD_CPU_STAT,t_Read_TS);
 			 
@@ -500,36 +503,35 @@ __task void Task_CPUStats(void)
 					util_t_US=((float)count_t_US/count_total)*100;
 					util_t_Refill_Sound_Buffer=((float)count_t_Refill_Sound_Buffer/count_total)*100;
 					util_t_GameStats=((float)count_t_GameStats/count_total)*100;
-					util_t_CPUStats=((float)count_t_CPUStats/count_total)*100;
+					//util_t_CPUStats=((float)count_t_CPUStats/count_total)*100;
 					util_idle=((float)count_idle/count_total)*100;
 		
 	 //print the cpu utilisatoin values
 
-					sprintf(buffer, "Task name , CPU Utilsation");
+					sprintf(buffer, "Task_Name |CPU_Util");
 		
 					os_mut_wait(&LCD_mutex, WAIT_FOREVER);
 
-					TFT_Text_PrintStr_RC(0, 0, buffer);
+					TFT_Text_PrintStr_RC(2, 0, buffer);
 
-					sprintf(buffer,"read accel , %f",util_t_Read_Accelerometer);
-					TFT_Text_PrintStr_RC(1,0,buffer);
-
-					sprintf(buffer,"Read TS , %f",util_t_Read_TS);
-					TFT_Text_PrintStr_RC(2,0,buffer);
-					sprintf(buffer,"sound mngr , %f",util_t_Sound_Manager);
+					sprintf(buffer,"Read_Accel|%f",util_t_Read_Accelerometer);
 					TFT_Text_PrintStr_RC(3,0,buffer);
-					sprintf(buffer,"updt scrn , %f",util_t_US);
+
+					sprintf(buffer,"Read_TS   |%f",util_t_Read_TS);
 					TFT_Text_PrintStr_RC(4,0,buffer);
-					sprintf(buffer,"rfll snd , %f",util_t_Refill_Sound_Buffer);
+					sprintf(buffer,"Sound_Mgr |%f",util_t_Sound_Manager);
 					TFT_Text_PrintStr_RC(5,0,buffer);
-					sprintf(buffer,"game stats , %f",util_t_GameStats);
+					sprintf(buffer,"Upd_scrn  |%f",util_t_US);
 					TFT_Text_PrintStr_RC(6,0,buffer);
-					sprintf(buffer,"idle time , %f",util_idle);
+					sprintf(buffer,"Refill_snd|%f",util_t_Refill_Sound_Buffer);
 					TFT_Text_PrintStr_RC(7,0,buffer);
+					sprintf(buffer,"Game_stats|%f",util_t_GameStats);
+					TFT_Text_PrintStr_RC(8,0,buffer);
+					sprintf(buffer,"Idle_Time |%f",util_idle);
+					TFT_Text_PrintStr_RC(9,0,buffer);
 		
 					os_mut_release(&LCD_mutex);
 	  
-			//y_pos=0;
 			
 			//Delay(100);
 			//while(1);
@@ -568,5 +570,87 @@ __task void Task_CPUStats(void)
 	
 	//free(CPUS_mbx_buf);
 	}
+}// CPU Stats Task
+
+__task void Task_GameStats(void)
+{
+	char buffer[16];
+	uint16_t score=0;
+	uint8_t life=3;
+	
+	
+	while(1)
+	{
+		
+		os_evt_wait_or((EV_LIFE_UPDATE|EV_SCORE_UPDATE), WAIT_FOREVER);
+		
+		if(os_evt_get() == EV_LIFE_UPDATE)
+		{
+			if(life!=0)
+			{
+				--life;
+				sprintf(buffer, "Score: %d", score);
+				os_mut_wait(&LCD_mutex, WAIT_FOREVER);
+				TFT_Text_PrintStr_RC(0, 0, buffer);
+				os_mut_release(&LCD_mutex);
+
+				sprintf(buffer, "Life : %d", life);
+				os_mut_wait(&LCD_mutex, WAIT_FOREVER);
+				TFT_Text_PrintStr_RC(1, 0, buffer);
+				os_mut_release(&LCD_mutex);
+			}
+			else
+			{ //TFT_Text_PrintStr_RC(TFT_MAX_ROWS-7, 1, "Test1");
+				TFT_Erase();
+				sprintf(buffer, "Score: %d", score);
+				os_mut_wait(&LCD_mutex, WAIT_FOREVER);
+				TFT_Text_PrintStr_RC(0, 0, buffer);
+				os_mut_release(&LCD_mutex);
+
+				sprintf(buffer, "Life : %d", life);
+				os_mut_wait(&LCD_mutex, WAIT_FOREVER);
+				TFT_Text_PrintStr_RC(1, 0, buffer);
+				os_mut_release(&LCD_mutex);
+				
+				
+				
+				
+				score=0; life =3;
+				os_tsk_prio_self(8);
+				//TFT_Erase();
+				//os_dly_wait(0x001f);
+				
+				os_evt_set(EV_GAME_OVER_UPD,t_US);
+				os_evt_set(EV_GAME_OVER_TS,t_Read_TS);
+				TFT_Text_PrintStr_RC(TFT_MAX_ROWS-7, 1, "Game Over");
+				TFT_Text_PrintStr_RC(TFT_MAX_ROWS-6, 1, "Start Over?");
+				TFT_Text_PrintStr_RC(TFT_MAX_ROWS-5, 1, "Tap anywhere!");
+				os_tsk_prio_self(6);
+				//os_evt_set(EV_GAME_OVER, t_Reset_Game);
+				
+				//os_evt_wait_and(EV_RESTART_GAME,WAIT_FOREVER);
+				//while(1);
+			}
+		}
+		else if(os_evt_get() == EV_SCORE_UPDATE)
+		{
+			++score;
+		/*	if(score>5)
+			{os_evt_set(EV_CPU_STAT_UPDATE,t_CPUStats);}*/
+			//Play_Tone();
+			sprintf(buffer, "Score: %d", score);
+			os_mut_wait(&LCD_mutex, WAIT_FOREVER);
+			TFT_Text_PrintStr_RC(0, 0, buffer);
+			os_mut_release(&LCD_mutex);
+
+			sprintf(buffer, "Life : %d", life);
+			os_mut_wait(&LCD_mutex, WAIT_FOREVER);
+			TFT_Text_PrintStr_RC(1, 0, buffer);
+			os_mut_release(&LCD_mutex);
+		}
+		
+		
+	}
 }
+
 

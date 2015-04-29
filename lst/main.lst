@@ -10932,6 +10932,8 @@ N __task void Task_GameStats(void);
 X __declspec(noreturn) void Task_GameStats(void);
 N __task void Task_CPUStats(void);
 X __declspec(noreturn) void Task_CPUStats(void);
+N
+N
 N 
 Nextern OS_TID t_Read_TS, t_Read_Accelerometer, t_Sound_Manager, t_US, t_Refill_Sound_Buffer;
 N
@@ -10944,21 +10946,30 @@ N
 N// constants for coin dimensions
 N#define COIN_RADIUS (10)
 N
-N// Event Flags for Update Screen
+N//Event flags for Game Stats
 N#define EV_SCORE_UPDATE (uint16_t)(0x0001)
 N#define EV_LIFE_UPDATE (uint16_t)(0x0002)
+N#define EV_RESTART_GAME	(uint16_t)(0x0004)
+N
+N// Event Flags for Update Screen
+N#define EV_TOUCH_DETECTED (uint16_t)(0x0001)
 N#define EV_CPU_STAT_DISP (uint16_t)(0x0004)
 N#define EV_CPU_STAT_DONE (uint16_t)(0x0008)
-N#define EV_CPU_STAT_RELEASE (uin16_t)(0x0001)
+N#define EV_GAME_OVER_UPD (uint16_t)(0x0010)
+N#define EV_RESTART_GAME_UPD (uint16_t)(0x0020)
 N
-N//Event flag to trigger CPU Stat task. Will be set by read_TS task
-N#define EV_CPU_STAT_UPDATE (uint16_t)(0x0001)
-N//Event flag for Read TouchScreen
-N#define EV_TOUCH_DETECTED (uint16_t)(0x0001)
-N#define EV_END_CPU_STAT		(uint16_t)(0x0002)
 N
 N//Event flag for Read_TS
 N#define EV_RECD_CPU_STAT (uint16_t)(0x0001)
+N#define EV_GAME_OVER_TS			(uint16_t)(0x0002)
+N
+N//Event flags for Reset Game
+N//#define EV_GAME_OVER (uint16_t)(0x0001)
+N//#define EV_RESTART_GAME (uint16_t)(0x0002)
+N
+N
+N
+N
 N
 N
 N#endif // TASKS_H
@@ -10988,7 +10999,7 @@ N	TFT_Erase();
 N	//TFT_Text_PrintStr_RC(0,0, "Test Code");
 N	sprintf(buffer, "Score: 0");
 N	TFT_Text_PrintStr_RC(0, 0, buffer);
-N	sprintf(buffer, "Life: 3");
+N	sprintf(buffer, "Life : 3");
 N	TFT_Text_PrintStr_RC(1, 0, buffer);
 N
 N/*

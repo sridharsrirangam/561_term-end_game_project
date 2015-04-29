@@ -45,7 +45,7 @@ int main (void) {
 	//TFT_Text_PrintStr_RC(0,0, "Test Code");
 	sprintf(buffer, "Score: 0");
 	TFT_Text_PrintStr_RC(0, 0, buffer);
-	sprintf(buffer, "Life: 3");
+	sprintf(buffer, "Life : 3");
 	TFT_Text_PrintStr_RC(1, 0, buffer);
 
 /*

@@ -748,6 +748,8 @@ N#endif
 N 
 L 13 "src\RTX_Config.c" 2
 N
+Nextern int test2;
+N
 N/*----------------------------------------------------------------------------
 N *      RTX User configuration part BEGIN
 N *---------------------------------------------------------------------------*/
@@ -761,7 +763,7 @@ N//   <o>Number of concurrent running tasks <0-250>
 N//   <i> Define max. number of tasks that will run at the same time.
 N//   <i> Default: 6
 N#ifndef OS_TASKCNT
-N #define OS_TASKCNT     10
+N #define OS_TASKCNT     12
 N#endif
 N
 N//   <o>Number of tasks with user-provided stack <0-250>
@@ -929,7 +931,7 @@ N  /* This function is called when a runtime error is detected. Parameter */
 N  /* 'err_code' holds the runtime error code (defined in RTL.H).         */
 N
 N  /* HERE: include optional code to be executed on runtime error. */
-N 
+N	//test2 = err_code;
 N	
 N	for (;;);
 N}
@@ -988,7 +990,7 @@ N/*----------------------------------------------------------------------------
 N *      Global Variables
 N *---------------------------------------------------------------------------*/
 NU16 const os_maxtaskrun = OS_TASKCNT;
-XU16 const os_maxtaskrun = 10;
+XU16 const os_maxtaskrun = 12;
 NU32 const os_stackinfo  = (OS_STKCHECK<<24)| (OS_PRIVCNT<<16) | (OS_STKSIZE*4);
 XU32 const os_stackinfo  = (1<<24)| (2<<16) | (128*4);
 NU32 const os_rrobin     = (OS_ROBIN << 16) | OS_ROBINTOUT;
@@ -1012,12 +1014,12 @@ XU32 const os_timernum  __attribute__((used)) = (0 << 16) | 0;
 N
 N/* Memory pool for TCB allocation    */
 N_declare_box (mp_tcb, OS_TCB_SIZE, OS_TASKCNT);
-XU32 mp_tcb[(((56)+3)/4)*(10) + 3];
+XU32 mp_tcb[(((56)+3)/4)*(12) + 3];
 NU16 const mp_tcb_size = sizeof(mp_tcb);
 N
 N/* Memory pool for System stack allocation (+ os_idle_demon). */
 N_declare_box8 (mp_stk, OS_STKSIZE*4, OS_TASKCNT-OS_PRIVCNT+1);
-XU64 mp_stk[(((128*4)+7)/8)*(10-2+1) + 2];
+XU64 mp_stk[(((128*4)+7)/8)*(12-2+1) + 2];
 NU32 const mp_stk_size = sizeof(mp_stk);
 N
 N#ifndef OS_FIFOSZ
@@ -1032,7 +1034,7 @@ XU8 const os_fifo_size = 16;
 N
 N/* An array of Active task pointers. */
 Nvoid *os_active_TCB[OS_TASKCNT];
-Xvoid *os_active_TCB[10];
+Xvoid *os_active_TCB[12];
 N
 N#if (OS_TIMERCNT != 0)
 X#if (0 != 0)
@@ -1393,7 +1395,7 @@ N/*----------------------------------------------------------------------------
 N * end of file
 N *---------------------------------------------------------------------------*/
 N
-L 203 "src\RTX_Config.c" 2
+L 205 "src\RTX_Config.c" 2
 N
 N/*----------------------------------------------------------------------------
 N * end of file

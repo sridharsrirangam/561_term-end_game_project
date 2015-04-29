@@ -31,6 +31,8 @@
  __task void Task_Update_Screen(void);
  __task void Task_GameStats(void);
  __task void Task_CPUStats(void);
+
+
  
 extern OS_TID t_Read_TS, t_Read_Accelerometer, t_Sound_Manager, t_US, t_Refill_Sound_Buffer;
 
@@ -43,21 +45,30 @@ extern OS_TID t_Read_TS, t_Read_Accelerometer, t_Sound_Manager, t_US, t_Refill_S
 // constants for coin dimensions
 #define COIN_RADIUS (10)
 
-// Event Flags for Update Screen
+//Event flags for Game Stats
 #define EV_SCORE_UPDATE (uint16_t)(0x0001)
 #define EV_LIFE_UPDATE (uint16_t)(0x0002)
+#define EV_RESTART_GAME	(uint16_t)(0x0004)
+
+// Event Flags for Update Screen
+#define EV_TOUCH_DETECTED (uint16_t)(0x0001)
 #define EV_CPU_STAT_DISP (uint16_t)(0x0004)
 #define EV_CPU_STAT_DONE (uint16_t)(0x0008)
-#define EV_CPU_STAT_RELEASE (uin16_t)(0x0001)
+#define EV_GAME_OVER_UPD (uint16_t)(0x0010)
+#define EV_RESTART_GAME_UPD (uint16_t)(0x0020)
 
-//Event flag to trigger CPU Stat task. Will be set by read_TS task
-#define EV_CPU_STAT_UPDATE (uint16_t)(0x0001)
-//Event flag for Read TouchScreen
-#define EV_TOUCH_DETECTED (uint16_t)(0x0001)
-#define EV_END_CPU_STAT		(uint16_t)(0x0002)
 
 //Event flag for Read_TS
 #define EV_RECD_CPU_STAT (uint16_t)(0x0001)
+#define EV_GAME_OVER_TS			(uint16_t)(0x0002)
+
+//Event flags for Reset Game
+//#define EV_GAME_OVER (uint16_t)(0x0001)
+//#define EV_RESTART_GAME (uint16_t)(0x0002)
+
+
+
+
 
 
 #endif // TASKS_H

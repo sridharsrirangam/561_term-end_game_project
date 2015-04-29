@@ -5,7 +5,7 @@
 <h2>Tool Versions:</h2>
 IDE-Version: µVision V5.13.0.0
 Copyright (C) 2014 ARM Ltd and ARM Germany GmbH. All rights reserved.
-License Information: sridhar srirangam, NCSU, LIC=----
+License Information: Adeesh Gopalakrishnan, Microsoft, LIC=----
  
 Tool Versions:
 Toolchain:       MDK-Lite  Version: 5.13.0.0
@@ -21,34 +21,32 @@ Target DLL:      CMSIS_AGDI.dll V1.20.8.0
 Dialog DLL:      TARMCM1.DLL V1.9.0.0
  
 <h2>Project:</h2>
-Z:\srirangamsridhar On My Mac\GitHub\561_term-end_game_project\BasicUI.uvproj
-Project File Date:  04/14/2015
+C:\Users\Adeesh\Downloads\ECE 561\Project 4\561_term-end_game_project\BasicUI.uvproj
+Project File Date:  04/26/2015
 
 <h2>Output:</h2>
 Build target 'KL25Z Flash'
 compiling tasks.c...
-src\tasks.c(154): warning:  #223-D: function "malloc" declared implicitly
-                                TRT_mbx_buf = (int*) malloc(sizeof(int));
-src\tasks.c(202): warning:  #223-D: function "malloc" declared implicitly
+src\tasks.c(165): warning:  #223-D: function "malloc" declared implicitly
+                                        TRT_mbx_buf = (int*) malloc(sizeof(int));
+src\tasks.c(230): warning:  #223-D: function "malloc" declared implicitly
                 TRA_mbx_buf = (float*) malloc(sizeof(float));
-src\tasks.c(318): warning:  #223-D: function "free" declared implicitly
+src\tasks.c(333): warning:  #223-D: function "rand" declared implicitly
+                                coin_X_pos=(rand()) % 230;
+src\tasks.c(358): warning:  #223-D: function "free" declared implicitly
                 free(TUS_mbx_buf);
-src\tasks.c(382): warning:  #223-D: function "rand" declared implicitly
+src\tasks.c(424): warning:  #223-D: function "rand" declared implicitly
                                         coin_X_pos=(rand()) % 230;
-src\tasks.c(237): warning:  #177-D: variable "score" was declared but never referenced
-        int16_t score=0;
-src\tasks.c(238): warning:  #177-D: variable "life" was declared but never referenced
-    int16_t life=3;
-src\tasks.c(250): warning:  #177-D: variable "fastFlag" was declared but never referenced
+src\tasks.c(278): warning:  #177-D: variable "fastFlag" was declared but never referenced
         uint8_t fastFlag,speed=5;
 src\tasks.c(473): warning:  #223-D: function "free" declared implicitly
                 free(CPUS_mbx_buf);
-src\tasks.c(457): warning:  #177-D: variable "iter" was declared but never referenced
+src\tasks.c(455): warning:  #177-D: variable "iter" was declared but never referenced
         int iter;
-src\tasks.c: 9 warnings, 0 errors
+src\tasks.c: 8 warnings, 0 errors
 linking...
-Program Size: Code=18964 RO-data=7624 RW-data=248 ZI-data=9688  
-".\obj\BasicUI.axf" - 0 Error(s), 9 Warning(s).
+Program Size: Code=21904 RO-data=9252 RW-data=264 ZI-data=11752  
+".\obj\BasicUI.axf" - 0 Error(s), 8 Warning(s).
 </pre>
 </body>
 </html>
