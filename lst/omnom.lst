@@ -1,8 +1,9 @@
-L 1 "src\TFT_text.c"
-N#include "font.h"
-L 1 ".\inc\font.h" 1
-N#ifndef FONT_H
-N#define FONT_H
+L 1 "src\omnom.c"
+N#include "TFT_LCD.h"
+L 1 ".\inc\TFT_LCD.h" 1
+N#ifndef TFT_LCD_H
+N#define TFT_LCD_H
+N
 N#include <stdint.h>
 L 1 "C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdint.h" 1
 N/* Copyright (C) ARM Ltd., 1999,2014 */
@@ -334,44 +335,7 @@ N
 N#endif /* __stdint_h */
 N
 N/* end of stdint.h */
-L 4 ".\inc\font.h" 2
-N
-Ntypedef struct {
-N	uint8_t FontID;
-N	uint8_t Orientation;
-N	uint16_t FirstChar;
-N	uint16_t LastChar;
-N	uint8_t Height;
-N	uint8_t Reserved;
-N} FONT_HEADER_T;
-N
-Ntypedef struct {
-N	uint32_t Width:8; // pixels
-N	uint32_t Offset:24; // Offset from start of table
-N} GLYPH_INDEX_T;
-N
-Nextern const uint8_t Lucida_Console8x13[];
-Nextern const uint8_t Lucida_Console12x19[];
-N//extern const uint8_t Lucida_Console20x31[];
-N
-N#define CHAR_WIDTH G_TFT_char_width 
-N#define CHAR_HEIGHT G_TFT_char_height 
-N
-N#define ROW_TO_Y(r) ((r)*G_TFT_char_height)
-N#define COL_TO_X(c) ((c)*G_TFT_char_width)
-N
-N#define TFT_MAX_COLS (TFT_WIDTH/G_TFT_char_width)
-N#define TFT_MAX_ROWS (TFT_HEIGHT/G_TFT_char_height)
-N
-N
-N#endif // #ifndef FONT_H
-L 2 "src\TFT_text.c" 2
-N#include "TFT_LCD.h"
-L 1 ".\inc\TFT_LCD.h" 1
-N#ifndef TFT_LCD_H
-N#define TFT_LCD_H
-N
-N#include <stdint.h>
+L 5 ".\inc\TFT_LCD.h" 2
 N
 N#define TFT_WIDTH (240)
 N#define TFT_HEIGHT (320)
@@ -460,179 +424,467 @@ N extern uint8_t G_TFT_char_width, G_TFT_char_height;
 N
 N
 N#endif
-L 3 "src\TFT_text.c" 2
+L 2 "src\omnom.c" 2
 N
-Nconst uint8_t * font;
-NFONT_HEADER_T * font_header;
-NGLYPH_INDEX_T * glyph_index; 
-N
-NCOLOR_T fg, bg;
-N
-Nuint8_t G_TFT_char_width, G_TFT_char_height;
-N
-Nconst uint8_t * fonts[] = {Lucida_Console8x13, Lucida_Console12x19}; // Lucida_Console20x31};
-Nconst uint8_t char_widths[] = {8, 12, 20};
-Nconst uint8_t char_heights[] = {13, 19, 31};
-N
-Nvoid TFT_Text_Set_Colors(COLOR_T * foreground, COLOR_T * background) {
-N	fg.R = foreground->R;
-N	fg.G = foreground->G;
-N	fg.B = foreground->B;
-N	bg.R = background->R;
-N	bg.G = background->G;
-N	bg.B = background->B;
-N}
-N
-Nvoid TFT_Erase(void) {
-N	TFT_Fill_Buffer(&bg);
-N}
-N
-Nvoid TFT_Text_Init(uint8_t font_num) {
-N	
-N#if 0  // Code for multiple fonts not working yet
-S	font = fonts[font_num];
-S	G_TFT_char_width = char_widths[font_num];
-S	G_TFT_char_height = char_heights[font_num];
-N#else // This code is working
-N	font = Lucida_Console12x19;
-N	G_TFT_char_width = 12;
-N	G_TFT_char_height = 19;
-N#endif
-N	
-N	font_header = (FONT_HEADER_T *) font;
-N	glyph_index = (GLYPH_INDEX_T *) (font + sizeof(FONT_HEADER_T));
-N	
-N	// Set default FG and BG colors
-N	fg.R = 255;
-N	fg.G = 255;
-N	fg.B = 0;
-N
-N	bg.R = 0;
-N	bg.G = 0;
-N	bg.B = 0;
-N}
-N
-Nvoid TFT_Text_PrintChar(PT_T * pos, char ch) {
-N	uint8_t glyph_index_entry;
-N	const uint8_t * glyph_data; // start of the data
-N	PT_T end_pos;
-N	COLOR_T * pixel_color;
-N	uint8_t bitmap_byte;
-N	uint8_t glyph_width, x_bm;
-N	uint32_t offset;
-N	uint32_t row, col, num_pixels;
-N	
-N	glyph_index_entry = ch - font_header->FirstChar;
-N	glyph_width = glyph_index[glyph_index_entry].Width;
-N	offset = glyph_index[glyph_index_entry].Offset;
-N	glyph_data = &(font[offset]);
-N	
-N	end_pos.X = pos->X+CHAR_WIDTH-1;
-X	end_pos.X = pos->X+G_TFT_char_width-1;
-N	end_pos.Y = pos->Y+CHAR_HEIGHT-1;
-X	end_pos.Y = pos->Y+G_TFT_char_height-1;
-N	TFT_Start_Rectangle(pos, &end_pos); 
-N	
-N	for (row = 0; row < CHAR_HEIGHT; row++) {
-X	for (row = 0; row < G_TFT_char_height; row++) {
-N		x_bm = 0;
-N		do {
-N			bitmap_byte = *glyph_data;
-N			if (bitmap_byte == 0x00) {
-N				num_pixels = MIN(8,glyph_width - x_bm);
-X				num_pixels = ((8)<(glyph_width - x_bm)? 8 : glyph_width - x_bm);
-N				TFT_Write_Rectangle_Pixel(&bg, num_pixels);
-N				x_bm += num_pixels;	
-N			} else if (bitmap_byte == 0xff) {
-N				num_pixels = MIN(8,glyph_width - x_bm);
-X				num_pixels = ((8)<(glyph_width - x_bm)? 8 : glyph_width - x_bm);
-N				TFT_Write_Rectangle_Pixel(&fg, num_pixels);
-N				x_bm += num_pixels;	
-N			} else {
-N				col = 0;
-N				num_pixels = 0;
-N				if ((bitmap_byte & 0x7f) == 0) {
-N					num_pixels = MIN(7,glyph_width - x_bm);
-X					num_pixels = ((7)<(glyph_width - x_bm)? 7 : glyph_width - x_bm);
-N					TFT_Write_Rectangle_Pixel(&bg, num_pixels);
-N				} else if ((bitmap_byte & 0x7f) == 0x7f) {
-N					num_pixels = MIN(7,glyph_width - x_bm);
-X					num_pixels = ((7)<(glyph_width - x_bm)? 7 : glyph_width - x_bm);
-N					TFT_Write_Rectangle_Pixel(&fg, num_pixels);
-N				} else if ((bitmap_byte & 0x3f) == 0) {
-N					num_pixels = MIN(6,glyph_width - x_bm);
-X					num_pixels = ((6)<(glyph_width - x_bm)? 6 : glyph_width - x_bm);
-N					TFT_Write_Rectangle_Pixel(&bg, num_pixels);
-N				} else if ((bitmap_byte & 0x3f) == 0x3f) {
-N					num_pixels = MIN(6,glyph_width - x_bm);
-X					num_pixels = ((6)<(glyph_width - x_bm)? 6 : glyph_width - x_bm);
-N					TFT_Write_Rectangle_Pixel(&fg, num_pixels);
-N				} else if ((bitmap_byte & 0x1f) == 0) {
-N					num_pixels = MIN(5,glyph_width - x_bm);
-X					num_pixels = ((5)<(glyph_width - x_bm)? 5 : glyph_width - x_bm);
-N					TFT_Write_Rectangle_Pixel(&bg, num_pixels);
-N				} else if ((bitmap_byte & 0x1f) == 0x1f) {
-N					num_pixels = MIN(5,glyph_width - x_bm);
-X					num_pixels = ((5)<(glyph_width - x_bm)? 5 : glyph_width - x_bm);
-N					TFT_Write_Rectangle_Pixel(&fg, num_pixels);
-N				} else if ((bitmap_byte & 0x0f) == 0) {
-N					num_pixels = MIN(4,glyph_width - x_bm);
-X					num_pixels = ((4)<(glyph_width - x_bm)? 4 : glyph_width - x_bm);
-N					TFT_Write_Rectangle_Pixel(&bg, num_pixels);
-N				} else if ((bitmap_byte & 0x0f) == 0x0f) {
-N					num_pixels = MIN(4,glyph_width - x_bm);
-X					num_pixels = ((4)<(glyph_width - x_bm)? 4 : glyph_width - x_bm);
-N					TFT_Write_Rectangle_Pixel(&fg, num_pixels);
-N				}
-N				if (num_pixels > 0) {
-N					x_bm += num_pixels;	
-N					col += num_pixels;
-N					bitmap_byte >>= num_pixels;
-N				}
-N				for (; col < 8; col++) {
-N					if (bitmap_byte & 0x01) // if pixel is to be set
-N						pixel_color = &fg;
-N					else
-N						pixel_color = &bg;
-N					TFT_Write_Rectangle_Pixel(pixel_color, 1);
-N					bitmap_byte >>= 1;
-N					x_bm++;
-N					if (x_bm >= glyph_width)
-N						break;
-N				}
-N			}
-N			glyph_data++;
-N		} while (x_bm < glyph_width);
-N		if (x_bm < CHAR_WIDTH) {
-X		if (x_bm < G_TFT_char_width) {
-N			// fill in rest of cell with background color for narrow glyphs
-N			TFT_Write_Rectangle_Pixel(&bg, CHAR_WIDTH - x_bm);	
-X			TFT_Write_Rectangle_Pixel(&bg, G_TFT_char_width - x_bm);	
-N		}
-N	}
-N}
-N
-Nvoid TFT_Text_PrintStr(PT_T * pos, char * str) {
-N	while (*str) {
-N		TFT_Text_PrintChar(pos, *str);
-N		str++;
-N		pos->X += CHAR_WIDTH; // forces monospacing for fonts
-X		pos->X += G_TFT_char_width; 
-N	}
-N}
-N
-Nvoid TFT_Text_PrintStr_RC( uint8_t  row, uint8_t  col, char  *str )
+Nconst COLOR_T omnom[20][20]=
 N{
-N	PT_T pos;
-N	pos.X = COL_TO_X( col );
-X	pos.X = ((col)*G_TFT_char_width);
-N	pos.Y = ROW_TO_Y( row );
-X	pos.Y = ((row)*G_TFT_char_height);
-N	while( *str )
-N	{
-N		TFT_Text_PrintChar( &pos, *str );
-N		str++;
-N		pos.X += CHAR_WIDTH;       /*     forces monospacing for fonts               */
-X		pos.X += G_TFT_char_width;        
-N	}
+N{
+N{0,0,0}, 
+N{5,7,4}, 
+N{0,2,1}, 
+N{0,1,0}, 
+N{7,5,6}, 
+N{5,1,0}, 
+N{3,0,0}, 
+N{3,4,0}, 
+N{0,1,6}, 
+N{0,5,0}, 
+N{38,51,25}, 
+N{15,26,0}, 
+N{2,4,0}, 
+N{4,3,1}, 
+N{0,0,0}, 
+N{4,4,4}, 
+N{1,2,0}, 
+N{4,5,0}, 
+N{1,0,5}, 
+N{4,1,12}, 
+N},
+N
+N{
+N{5,5,7}, 
+N{0,1,3}, 
+N{0,1,0}, 
+N{3,5,4}, 
+N{1,0,2}, 
+N{4,0,1}, 
+N{10,6,3}, 
+N{0,1,0}, 
+N{0,4,0}, 
+N{0,9,0}, 
+N{162,175,149}, 
+N{42,52,25}, 
+N{0,2,0}, 
+N{4,3,1}, 
+N{2,2,4}, 
+N{0,0,2}, 
+N{0,0,0}, 
+N{0,0,0}, 
+N{1,0,5}, 
+N{9,6,17}, 
+N},
+N
+N{
+N{1,0,10}, 
+N{0,0,5}, 
+N{4,6,5}, 
+N{0,1,0}, 
+N{2,0,5}, 
+N{5,0,7}, 
+N{3,0,0}, 
+N{0,1,0}, 
+N{1,9,0}, 
+N{28,41,13}, 
+N{38,48,23}, 
+N{0,5,0}, 
+N{6,7,0}, 
+N{1,0,0}, 
+N{0,0,4}, 
+N{3,2,10}, 
+N{6,6,16}, 
+N{0,0,10}, 
+N{1,0,8}, 
+N{2,1,9}, 
+N},
+N
+N{
+N{0,0,9}, 
+N{3,2,10}, 
+N{0,1,3}, 
+N{0,1,0}, 
+N{1,0,5}, 
+N{4,0,6}, 
+N{7,2,6}, 
+N{6,6,0}, 
+N{22,31,4}, 
+N{155,169,134}, 
+N{72,83,53}, 
+N{1,9,0}, 
+N{0,1,0}, 
+N{3,1,4}, 
+N{0,0,5}, 
+N{2,1,9}, 
+N{0,0,7}, 
+N{0,0,8}, 
+N{1,0,8}, 
+N{0,0,5}, 
+N},
+N
+N{
+N{4,2,7}, 
+N{0,0,4}, 
+N{0,0,2}, 
+N{1,2,4}, 
+N{7,6,11}, 
+N{30,28,31}, 
+N{255,253,255}, 
+N{252,251,246}, 
+N{246,254,233}, 
+N{140,151,121}, 
+N{163,173,139}, 
+N{190,196,170}, 
+N{255,254,250}, 
+N{248,246,251}, 
+N{10,9,14}, 
+N{0,0,2}, 
+N{0,1,0}, 
+N{5,7,4}, 
+N{0,0,2}, 
+N{0,0,4}, 
+N},
+N
+N{
+N{2,0,3}, 
+N{1,1,1}, 
+N{4,7,0}, 
+N{0,5,0}, 
+N{37,38,33}, 
+N{255,255,251}, 
+N{255,254,255}, 
+N{255,254,250}, 
+N{252,255,244}, 
+N{242,252,228}, 
+N{250,255,230}, 
+N{254,255,237}, 
+N{252,251,247}, 
+N{255,254,255}, 
+N{250,250,250}, 
+N{1,4,0}, 
+N{0,6,0}, 
+N{0,6,0}, 
+N{0,1,0}, 
+N{0,0,2}, 
+N},
+N
+N{
+N{3,0,7}, 
+N{3,4,0}, 
+N{0,6,0}, 
+N{138,147,118}, 
+N{253,255,235}, 
+N{255,255,244}, 
+N{254,253,249}, 
+N{253,253,251}, 
+N{1,7,0}, 
+N{240,248,233}, 
+N{246,252,240}, 
+N{0,3,0}, 
+N{255,255,250}, 
+N{255,255,250}, 
+N{251,252,244}, 
+N{242,246,231}, 
+N{38,47,18}, 
+N{0,9,0}, 
+N{0,3,0}, 
+N{0,2,1}, 
+N},
+N
+N{
+N{1,0,4}, 
+N{5,7,0}, 
+N{22,34,0}, 
+N{162,177,118}, 
+N{251,255,222}, 
+N{254,255,238}, 
+N{255,255,250}, 
+N{254,255,250}, 
+N{0,5,0}, 
+N{248,255,241}, 
+N{250,255,246}, 
+N{0,2,0}, 
+N{254,254,246}, 
+N{255,255,242}, 
+N{250,255,233}, 
+N{249,255,225}, 
+N{163,177,128}, 
+N{42,55,12}, 
+N{0,5,0}, 
+N{0,2,0}, 
+N},
+N
+N{
+N{3,4,0}, 
+N{2,9,0}, 
+N{165,185,98}, 
+N{164,185,92}, 
+N{245,255,205}, 
+N{254,255,236}, 
+N{252,255,246}, 
+N{254,255,248}, 
+N{250,255,238}, 
+N{247,255,232}, 
+N{252,255,241}, 
+N{251,255,241}, 
+N{255,255,246}, 
+N{253,255,237}, 
+N{248,255,217}, 
+N{150,165,106}, 
+N{164,182,108}, 
+N{166,185,121}, 
+N{0,9,0}, 
+N{0,7,0}, 
+N},
+N
+N{
+N{0,1,0}, 
+N{11,19,0}, 
+N{157,178,85}, 
+N{165,191,84}, 
+N{152,170,94}, 
+N{245,255,205}, 
+N{249,255,222}, 
+N{246,255,219}, 
+N{243,255,205}, 
+N{45,63,5}, 
+N{36,50,1}, 
+N{246,255,217}, 
+N{248,255,221}, 
+N{253,255,219}, 
+N{238,255,187}, 
+N{166,188,106}, 
+N{162,184,102}, 
+N{45,64,0}, 
+N{0,7,0}, 
+N{0,5,0}, 
+N},
+N
+N{
+N{0,3,0}, 
+N{0,7,0}, 
+N{88,108,36}, 
+N{161,186,85}, 
+N{163,189,79}, 
+N{170,193,85}, 
+N{234,255,164}, 
+N{231,252,159}, 
+N{149,177,64}, 
+N{160,189,73}, 
+N{155,179,81}, 
+N{155,175,88}, 
+N{153,170,90}, 
+N{150,170,85}, 
+N{158,185,82}, 
+N{160,187,90}, 
+N{235,255,190}, 
+N{219,235,196}, 
+N{2,12,1}, 
+N{0,2,4}, 
+N},
+N
+N{
+N{1,3,0}, 
+N{0,5,0}, 
+N{240,255,196}, 
+N{240,255,169}, 
+N{152,183,56}, 
+N{166,198,65}, 
+N{154,181,68}, 
+N{163,190,77}, 
+N{162,195,65}, 
+N{155,188,58}, 
+N{159,187,74}, 
+N{165,190,86}, 
+N{165,187,87}, 
+N{155,181,74}, 
+N{164,196,71}, 
+N{33,66,0}, 
+N{30,56,0}, 
+N{32,50,12}, 
+N{0,8,0}, 
+N{0,6,9}, 
+N},
+N
+N{
+N{0,2,3}, 
+N{4,13,0}, 
+N{35,55,0}, 
+N{157,184,87}, 
+N{154,186,61}, 
+N{41,73,0}, 
+N{160,187,84}, 
+N{158,185,88}, 
+N{155,186,82}, 
+N{160,191,88}, 
+N{165,192,99}, 
+N{156,180,92}, 
+N{155,180,88}, 
+N{68,97,0}, 
+N{113,151,14}, 
+N{158,198,66}, 
+N{155,184,91}, 
+N{41,62,5}, 
+N{0,7,0}, 
+N{0,5,0}, 
+N},
+N
+N{
+N{0,2,3}, 
+N{2,11,0}, 
+N{37,60,0}, 
+N{161,192,88}, 
+N{154,190,58}, 
+N{156,193,54}, 
+N{234,255,146}, 
+N{235,255,155}, 
+N{36,70,0}, 
+N{31,65,0}, 
+N{33,65,0}, 
+N{45,74,0}, 
+N{236,255,154}, 
+N{228,255,137}, 
+N{158,200,52}, 
+N{152,195,53}, 
+N{156,189,82}, 
+N{2,27,0}, 
+N{2,16,0}, 
+N{0,11,3}, 
+N},
+N
+N{
+N{0,5,0}, 
+N{0,10,0}, 
+N{59,83,9}, 
+N{157,192,76}, 
+N{156,196,45}, 
+N{156,199,32}, 
+N{162,202,43}, 
+N{163,203,44}, 
+N{157,199,39}, 
+N{156,198,36}, 
+N{165,207,47}, 
+N{154,194,35}, 
+N{156,196,37}, 
+N{155,197,37}, 
+N{153,199,38}, 
+N{152,196,51}, 
+N{114,148,36}, 
+N{113,139,66}, 
+N{14,28,5}, 
+N{0,4,3}, 
+N},
+N
+N{
+N{0,5,1}, 
+N{24,37,11}, 
+N{118,141,73}, 
+N{111,145,35}, 
+N{157,197,49}, 
+N{159,202,35}, 
+N{155,196,30}, 
+N{160,203,36}, 
+N{158,201,36}, 
+N{151,196,31}, 
+N{157,200,35}, 
+N{154,197,30}, 
+N{161,204,29}, 
+N{157,200,32}, 
+N{150,195,44}, 
+N{114,153,28}, 
+N{117,146,54}, 
+N{116,135,79}, 
+N{32,43,26}, 
+N{0,2,4}, 
+N},
+N
+N{
+N{0,3,5}, 
+N{0,8,0}, 
+N{119,138,92}, 
+N{111,138,57}, 
+N{109,142,27}, 
+N{161,197,63}, 
+N{153,191,52}, 
+N{157,195,58}, 
+N{157,193,67}, 
+N{158,193,73}, 
+N{153,188,72}, 
+N{107,144,15}, 
+N{158,198,40}, 
+N{159,198,43}, 
+N{153,188,70}, 
+N{33,61,0}, 
+N{38,51,5}, 
+N{24,32,9}, 
+N{8,11,2}, 
+N{0,1,0}, 
+N},
+N
+N{
+N{0,2,8}, 
+N{0,5,0}, 
+N{0,11,0}, 
+N{0,17,0}, 
+N{35,58,0}, 
+N{161,187,96}, 
+N{159,185,94}, 
+N{28,56,0}, 
+N{36,63,0}, 
+N{46,72,0}, 
+N{28,53,0}, 
+N{36,64,0}, 
+N{159,189,75}, 
+N{156,186,72}, 
+N{163,187,111}, 
+N{6,22,0}, 
+N{3,7,0}, 
+N{2,3,0}, 
+N{0,1,0}, 
+N{0,1,0}, 
+N},
+N
+N{
+N{1,1,9}, 
+N{4,8,7}, 
+N{0,4,0}, 
+N{0,8,0}, 
+N{0,9,0}, 
+N{1,15,0}, 
+N{0,6,0}, 
+N{2,14,0}, 
+N{0,8,0}, 
+N{0,12,0}, 
+N{0,5,0}, 
+N{0,8,0}, 
+N{5,18,0}, 
+N{2,15,0}, 
+N{0,10,0}, 
+N{0,4,0}, 
+N{0,2,0}, 
+N{0,1,0}, 
+N{1,2,0}, 
+N{2,3,0}, 
+N},
+N
+N{
+N{0,0,7}, 
+N{0,0,2}, 
+N{5,8,0}, 
+N{0,4,0}, 
+N{0,6,0}, 
+N{0,2,0}, 
+N{2,6,18}, 
+N{0,0,12}, 
+N{0,3,7}, 
+N{2,8,8}, 
+N{1,6,12}, 
+N{0,1,4}, 
+N{3,9,0}, 
+N{0,3,0}, 
+N{0,1,0}, 
+N{0,1,2}, 
+N{2,2,0}, 
+N{1,2,0}, 
+N{0,1,0}, 
+N{0,1,0}, 
 N}
+N};

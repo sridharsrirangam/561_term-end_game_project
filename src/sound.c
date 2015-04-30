@@ -14,6 +14,11 @@ uint16_t SineTable[NUM_STEPS];
 uint16_t Waveform[NUM_WAVEFORM_SAMPLES];
 
 uint32_t WNG_Len=0;
+extern U64 RA_Stack[7][64];
+uint32_t stack_max_tsk2;
+uint32_t current_depth_tsk2;
+uint32_t stack_max_tsk4;
+uint32_t current_depth_tsk4;
 
 void DAC_Init(void) {
   // Init DAC output
@@ -134,21 +139,49 @@ void Play_Tone_with_DMA(unsigned int period, unsigned int num_cycles) {
 
 __task void Task_Sound_Manager(void) {
 	
+	uint8_t to_read_or_not_to_read=5;
+	uint32_t element;
+	uint8_t i;
 	os_itv_set(1000);
-	
+		  
+current_depth_tsk2 = (((uint32_t)&RA_Stack[2][63])+8- __current_sp());
+	//current_depth_tsk2= __current_sp();
+	//current_depth_tsk2=(uint32_t)&RA_Stack[2][63];
+
 	while (1) {
 		//os_itv_wait();
 				os_evt_wait_and(EV_PLAYSOUND, WAIT_FOREVER); // wait for trigger
+		
 		// make a new sound every second
 		
 		// Hack - temporary code until voice code is added
 		WNG_Len = 2500;
 		Play_Waveform_with_DMA();
+			to_read_or_not_to_read--;
+		if(to_read_or_not_to_read==0)
+		{
+     for(i=1;i<63;i++)
+       {
+				 element = RA_Stack[2][i];
+				 if(element !=0)
+				 { stack_max_tsk2 = i;
+					 to_read_or_not_to_read=5;
+					 	
+
+					 break;
+				 }
+			 }
+		 }			 
+	
+		
 	}
 }
 
 __task void Task_Refill_Sound_Buffer(void) {
 	uint32_t i;
+	uint8_t to_read_or_not_to_read=5;
+	uint32_t element;
+	uint8_t j;
 	/*
 	uint16_t Wave[512];
 		for (i=0; i<NUM_WAVEFORM_SAMPLES; i++)
@@ -156,8 +189,17 @@ __task void Task_Refill_Sound_Buffer(void) {
 		Wave[i] = i;
 	}
 	*/
+	
+current_depth_tsk4 = (((uint32_t)&RA_Stack[4][63])+ 8- __current_sp());	
+		//current_depth_tsk4= __current_sp();
+	//current_depth_tsk4=(uint32_t)&RA_Stack[4][63];
+
+
 	while (1) {
 		os_evt_wait_and(EV_REFILL_SOUND, WAIT_FOREVER); // wait for trigger
+
+					 
+//current_depth_tsk4= __current_sp();
 
 		for (i=0; i<NUM_WAVEFORM_SAMPLES; i++) {
 			if (WNG_Len > 0) {
@@ -169,8 +211,24 @@ __task void Task_Refill_Sound_Buffer(void) {
 				Waveform[i] = MAX_DAC_CODE/2;
 			}
 		}
-	}
-}
+	to_read_or_not_to_read--;
+		if(to_read_or_not_to_read==0)
+		{
+     for(j=1;j<63;j++)
+       {
+				 element = RA_Stack[4][j];
+				 if(element !=0)
+				 { stack_max_tsk4 = j;
+					 to_read_or_not_to_read=5;
+					 
 
+					 break;
+				 }
+			 }
+		 }
+		
+			
+}
+}
 
 

@@ -9,3 +9,5 @@
 .\obj\timers.o: .\inc\region.h
 .\obj\timers.o: .\inc\profile.h
 .\obj\timers.o: C:\Keil_v5\ARM\RV31\INC\rtl.h
+.\obj\timers.o: .\inc\tasks.h
+.\obj\timers.o: .\inc\TFT_LCD.h

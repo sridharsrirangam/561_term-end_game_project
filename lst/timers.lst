@@ -8086,6 +8086,183 @@ N
 N#endif
 N 
 L 6 "src\timers.c" 2
+N#include "tasks.h"
+L 1 ".\inc\tasks.h" 1
+N#ifndef TASKS_H
+N#define TASKS_H
+N
+N#include <RTL.h>
+N#include "TFT_LCD.h"
+L 1 ".\inc\TFT_LCD.h" 1
+N#ifndef TFT_LCD_H
+N#define TFT_LCD_H
+N
+N#include <stdint.h>
+N
+N#define TFT_WIDTH (240)
+N#define TFT_HEIGHT (320)
+N
+N// TFT LCD Hardware Interface
+N// signals -- all on port C
+N#define TFT_DB8_POS (3)
+N#define TFT_DB15_POS (10)
+N#define TFT_D_NC_POS (12)
+N#define TFT_NWR_POS (13)
+N#define TFT_NRD_POS (16)
+N#define TFT_NRST_POS (17)
+N#define TFT_DATA_MASK (((unsigned )0x0ff) << TFT_DB8_POS)
+N
+N// Backlight
+N#define TFT_BL_TPM (TPM1)
+N#define TFT_BL_TPM_CHANNEL (0)
+N#define TFT_BL_TPM_FREQ (200)
+N#define TFT_BL_PERIOD ((SystemCoreClock)/(2*(TFT_BL_TPM_FREQ)))
+N
+N// Touchscreen Hardware Interface
+N#define TFT_TS_YD_CHANNEL (0)
+N#define TFT_TS_YU_CHANNEL (3)
+N#define TFT_TS_XL_CHANNEL (4) 
+N#define TFT_TS_XR_CHANNEL (7)
+N
+N#define TFT_TS_YD_BIT (20)
+N#define TFT_TS_XL_BIT (21)
+N#define TFT_TS_YU_BIT (22)
+N#define TFT_TS_XR_BIT (23)
+N
+N// Touchscreen Configuration
+N#define TS_DELAY (1)
+N#define TS_CALIB_SAMPLES (10)
+N
+N/**************************************************************/
+N#define	GPIO_ResetBit(pos)	(FPTC->PCOR = MASK(pos))
+N#define	GPIO_SetBit(pos) 		(FPTC->PSOR = MASK(pos))
+N#define GPIO_Write(cmd) 		FPTC->PDOR &= ~TFT_DATA_MASK; \
+N														FPTC->PDOR |= (cmd & 0xff) << TFT_DB8_POS;
+X#define GPIO_Write(cmd) 		FPTC->PDOR &= ~TFT_DATA_MASK; 														FPTC->PDOR |= (cmd & 0xff) << TFT_DB8_POS;
+N/**************************************************************/
+N
+N#define MIN(a,b) ((a)<(b)? a : b)
+N#define MAX(a,b) ((a)>(b)? a : b)
+N
+Ntypedef struct {
+N	uint16_t X, Y;
+N} PT_T;
+N
+Ntypedef struct {
+N	uint8_t R, G, B; // note: using 5-6-5 color mode for LCD. 
+N									 // Values are left aligned here
+N} COLOR_T;
+N
+N
+N void TFT_Init(void);
+N void TFT_Fill_Buffer(COLOR_T * color);
+N void TFT_Fill_Rectangle(PT_T * p1, PT_T * p2, COLOR_T * color);
+N uint32_t TFT_Start_Rectangle(PT_T * p1, PT_T * p2);
+N void TFT_Write_Rectangle_Pixel(COLOR_T * color, unsigned int count);
+N
+N
+N void TFT_Plot_Pixel(PT_T * pos, COLOR_T * color);
+N void TFT_Set_BL(uint8_t on);
+N void TFT_Set_Brightness(uint8_t brightness);
+N void TFT_Set_Backlight_Brightness(uint16_t brightness_percent);
+N void TFT_Set_Colors(COLOR_T * foreground, COLOR_T * background);
+N
+N void TFT_Erase(void);
+N void TFT_Text_Init(uint8_t font_num);
+N void TFT_Text_PrintChar(PT_T * pos, char ch);
+N void TFT_Text_PrintStr(PT_T * pos, char * str);
+N void TFT_Text_PrintStr_RC( uint8_t  row, uint8_t col, char *  str);
+N
+N void Graphics_Test(void);
+N void TFT_Draw_Line(PT_T * p1, PT_T * p2, COLOR_T * color);
+N
+N
+N void TFT_TS_Init(void);
+N uint32_t TFT_TS_Read(PT_T * position);
+N void TFT_TS_Test(void);
+N void TFT_TS_Calibrate(void);
+N
+N extern uint8_t G_TFT_char_width, G_TFT_char_height;
+N
+N
+N#endif
+L 6 ".\inc\tasks.h" 2
+N
+N#define TASK_READ_TS_PERIOD_TICKS (20)  // 1 tick/ms
+N#define TASK_READ_ACCELEROMETER_PERIOD_TICKS (100)  // 1 tick/ms
+N#define TASK_SOUND_PERIOD_TICKS (100)  // 1 tick/ms
+N#define TASK_UPDATE_SCREEN_PERIOD_TICKS (100)
+N
+N// Debug outputs on Port B
+N#define DEBUG_T0_POS 	0		// J10 pin 2
+N#define DEBUG_T1_POS 	1 	// J10 pin 4
+N#define DEBUG_T2_POS 2 	// J10 pin 6
+N#define DEBUG_T3_POS 	3		// J10 pin 8
+N
+N void	Init_Debug_Signals(void);
+N
+N#define EV_PLAYSOUND (1) 
+N#define EV_SOUND_ON (2)
+N#define EV_SOUND_OFF (4)
+N
+N#define EV_REFILL_SOUND (1)
+N
+N#define WAIT_FOREVER (0xffff)
+N
+N __task void Task_Init(void);
+X __declspec(noreturn) void Task_Init(void);
+N __task void Task_Read_TS(void);
+X __declspec(noreturn) void Task_Read_TS(void);
+N __task void Task_Read_Accelerometer(void);
+X __declspec(noreturn) void Task_Read_Accelerometer(void);
+N __task void Task_Update_Screen(void);
+X __declspec(noreturn) void Task_Update_Screen(void);
+N __task void Task_GameStats(void);
+X __declspec(noreturn) void Task_GameStats(void);
+N __task void Task_CPUStats(void);
+X __declspec(noreturn) void Task_CPUStats(void);
+N
+N
+N 
+Nextern OS_TID t_Read_TS, t_Read_Accelerometer, t_Sound_Manager, t_US, t_Refill_Sound_Buffer,t_CPUStats;
+N
+N 
+N// Game Constants
+N#define PADDLE_WIDTH (40)
+N#define PADDLE_HEIGHT (40)
+N#define PADDLE_Y_POS (TFT_HEIGHT-4-PADDLE_HEIGHT)
+N
+N// constants for coin dimensions
+N#define COIN_RADIUS (10)
+N
+N//Event flags for Game Stats
+N#define EV_SCORE_UPDATE (uint16_t)(0x0001)
+N#define EV_LIFE_UPDATE (uint16_t)(0x0002)
+N#define EV_RESTART_GAME	(uint16_t)(0x0004)
+N
+N// Event Flags for Update Screen
+N#define EV_TOUCH_DETECTED (uint16_t)(0x0001)
+N#define EV_CPU_STAT_DISP (uint16_t)(0x0004)
+N#define EV_CPU_STAT_DONE (uint16_t)(0x0008)
+N#define EV_GAME_OVER_UPD (uint16_t)(0x0010)
+N#define EV_RESTART_GAME_UPD (uint16_t)(0x0020)
+N#define EV_CPU_STAT_FROM_ISR (uint16_t)(0x0001)
+N
+N//Event flag for Read_TS
+N#define EV_RECD_CPU_STAT (uint16_t)(0x0001)
+N#define EV_GAME_OVER_TS			(uint16_t)(0x0002)
+N
+N//Event flags for Reset Game
+N//#define EV_GAME_OVER (uint16_t)(0x0001)
+N//#define EV_RESTART_GAME (uint16_t)(0x0002)
+N
+N
+N
+N
+N
+N
+N#endif // TASKS_H
+L 7 "src\timers.c" 2
 N
 Nvolatile unsigned PIT_interrupt_counter = 0;
 Nvolatile unsigned LCD_update_requested = 0;
@@ -8095,12 +8272,6 @@ Nextern unsigned profile_ticks;
 Nextern volatile char profiling_enabled;
 N
 Nextern volatile unsigned int adx_lost, num_lost; 
-N
-Nextern OS_TID t_Read_TS, t_Read_Accelerometer, t_Sound_Manager, t_US,
-N							t_Refill_Sound_Buffer, t_GameStats, t_CPUStats;
-N
-N
-N
 Nuint32_t count_t_Read_TS=0,
 N        count_t_Read_Accelerometer=0,
 N	 			count_t_Sound_Manager=0,
@@ -8110,6 +8281,11 @@ N				count_t_GameStats=0,
 N				count_t_CPUStats=0,
 N				count_idle=0,
 N				count_total=0;
+N
+Nextern OS_TID t_Read_TS, t_Read_Accelerometer, t_Sound_Manager, t_US,
+N							t_Refill_Sound_Buffer, t_GameStats, t_CPUStats;
+NOS_TID interrupted_task;
+N//uint32_t count_total=0;
 N
 N/*	float util_t_Read_TS=0,
 N        util_t_Read_Accelerometer=0,
@@ -8124,7 +8300,7 @@ N	*/
 Nvoid PIT_IRQHandler() {
 N	unsigned int s, e;
 N  unsigned int i;
-N   OS_TID interrupted_task;	
+N   	
 N	//clear pending IRQ
 N	NVIC_ClearPendingIRQ(PIT_IRQn);
 N	
@@ -8141,6 +8317,7 @@ N		//check which task got interrupted
 N		interrupted_task = isr_tsk_get();
 X		interrupted_task = rt_tsk_self();
 N		count_total++;
+N	  //isr_evt_set(EV_CPU_STAT_FROM_ISR,t_CPUStats);
 N	if(interrupted_task==t_Read_TS)
 N	{++count_t_Read_TS;}
 N	else if(interrupted_task==t_Read_Accelerometer)
@@ -8157,6 +8334,7 @@ N	else if(interrupted_task==t_CPUStats)
 N	{++count_t_CPUStats;}
 N	else if(interrupted_task==0xFF)
 N	{++count_idle;}
+N	
 N/*
 N    util_t_Read_Accelerometer = (count_t_Read_Accelerometer/count_total)*100;
 N		util_t_Read_TS = (count_t_Read_TS/count_total)*100;

@@ -345,7 +345,7 @@
           </ArmAdsMisc>
           <Cads>
             <interw>1</interw>
-            <Optim>1</Optim>
+            <Optim>2</Optim>
             <oTime>0</oTime>
             <SplitLS>0</SplitLS>
             <OneElfS>0</OneElfS>
@@ -396,7 +396,7 @@
             <ScatterFile></ScatterFile>
             <IncludeLibs></IncludeLibs>
             <IncludeLibsPath></IncludeLibsPath>
-            <Misc></Misc>
+            <Misc>--debug</Misc>
             <LinkerInputFile></LinkerInputFile>
             <DisabledWarnings></DisabledWarnings>
           </LDads>
@@ -505,11 +505,6 @@
               <FilePath>.\src\lucida_12x19.c</FilePath>
             </File>
             <File>
-              <FileName>lucida_20x31.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\src\lucida_20x31.c</FilePath>
-            </File>
-            <File>
               <FileName>RTX_Config.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\src\RTX_Config.c</FilePath>
@@ -518,11 +513,6 @@
               <FileName>sound.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\src\sound.c</FilePath>
-            </File>
-            <File>
-              <FileName>tasks.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\src\tasks.c</FilePath>
             </File>
             <File>
               <FileName>I2C.c</FileName>
@@ -553,6 +543,16 @@
               <FileName>TFT_text.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\src\TFT_text.c</FilePath>
+            </File>
+            <File>
+              <FileName>omnom.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\src\omnom.c</FilePath>
+            </File>
+            <File>
+              <FileName>tasks.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\src\tasks.c</FilePath>
             </File>
           </Files>
         </Group>

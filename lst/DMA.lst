@@ -8202,12 +8202,12 @@ X __declspec(noreturn) void Task_CPUStats(void);
 N
 N
 N 
-Nextern OS_TID t_Read_TS, t_Read_Accelerometer, t_Sound_Manager, t_US, t_Refill_Sound_Buffer;
+Nextern OS_TID t_Read_TS, t_Read_Accelerometer, t_Sound_Manager, t_US, t_Refill_Sound_Buffer,t_CPUStats;
 N
 N 
 N// Game Constants
 N#define PADDLE_WIDTH (40)
-N#define PADDLE_HEIGHT (15)
+N#define PADDLE_HEIGHT (40)
 N#define PADDLE_Y_POS (TFT_HEIGHT-4-PADDLE_HEIGHT)
 N
 N// constants for coin dimensions
@@ -8224,7 +8224,7 @@ N#define EV_CPU_STAT_DISP (uint16_t)(0x0004)
 N#define EV_CPU_STAT_DONE (uint16_t)(0x0008)
 N#define EV_GAME_OVER_UPD (uint16_t)(0x0010)
 N#define EV_RESTART_GAME_UPD (uint16_t)(0x0020)
-N
+N#define EV_CPU_STAT_FROM_ISR (uint16_t)(0x0001)
 N
 N//Event flag for Read_TS
 N#define EV_RECD_CPU_STAT (uint16_t)(0x0001)

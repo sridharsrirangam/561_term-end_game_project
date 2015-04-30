@@ -34,12 +34,12 @@
 
 
  
-extern OS_TID t_Read_TS, t_Read_Accelerometer, t_Sound_Manager, t_US, t_Refill_Sound_Buffer;
+extern OS_TID t_Read_TS, t_Read_Accelerometer, t_Sound_Manager, t_US, t_Refill_Sound_Buffer,t_CPUStats;
 
  
 // Game Constants
 #define PADDLE_WIDTH (40)
-#define PADDLE_HEIGHT (15)
+#define PADDLE_HEIGHT (40)
 #define PADDLE_Y_POS (TFT_HEIGHT-4-PADDLE_HEIGHT)
 
 // constants for coin dimensions
@@ -56,7 +56,7 @@ extern OS_TID t_Read_TS, t_Read_Accelerometer, t_Sound_Manager, t_US, t_Refill_S
 #define EV_CPU_STAT_DONE (uint16_t)(0x0008)
 #define EV_GAME_OVER_UPD (uint16_t)(0x0010)
 #define EV_RESTART_GAME_UPD (uint16_t)(0x0020)
-
+#define EV_CPU_STAT_FROM_ISR (uint16_t)(0x0001)
 
 //Event flag for Read_TS
 #define EV_RECD_CPU_STAT (uint16_t)(0x0001)

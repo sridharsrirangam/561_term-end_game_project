@@ -18,7 +18,7 @@ typedef struct {
 
 extern const uint8_t Lucida_Console8x13[];
 extern const uint8_t Lucida_Console12x19[];
-extern const uint8_t Lucida_Console20x31[];
+//extern const uint8_t Lucida_Console20x31[];
 
 #define CHAR_WIDTH G_TFT_char_width 
 #define CHAR_HEIGHT G_TFT_char_height 

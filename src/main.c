@@ -28,7 +28,7 @@
  *----------------------------------------------------------------------------*/
 int main (void) {
 
-	char buffer[16];
+	//char buffer[16];
 	//
 	PIT_Init(2399); // 24 MHz/(23999+1) = 1000 samples per second
 	PIT_Start();
@@ -43,10 +43,10 @@ int main (void) {
 	TFT_Text_Init(1);
 	TFT_Erase();
 	//TFT_Text_PrintStr_RC(0,0, "Test Code");
-	sprintf(buffer, "Score: 0");
-	TFT_Text_PrintStr_RC(0, 0, buffer);
-	sprintf(buffer, "Life : 3");
-	TFT_Text_PrintStr_RC(1, 0, buffer);
+	//sprintf(buffer, "Score: 0");
+	TFT_Text_PrintStr_RC(0, 0,"Score: 0");
+	//sprintf(buffer, "Life : 3");
+	TFT_Text_PrintStr_RC(1, 0, "Life : 3");
 
 /*
 	Graphics_Test();

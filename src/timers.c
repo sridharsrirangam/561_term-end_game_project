@@ -3,6 +3,7 @@
 #include "region.h"
 #include "profile.h"
 #include "rtl.h"
+#include "tasks.h"
 
 volatile unsigned PIT_interrupt_counter = 0;
 volatile unsigned LCD_update_requested = 0;
@@ -12,12 +13,6 @@ extern unsigned profile_ticks;
 extern volatile char profiling_enabled;
 
 extern volatile unsigned int adx_lost, num_lost; 
-
-extern OS_TID t_Read_TS, t_Read_Accelerometer, t_Sound_Manager, t_US,
-							t_Refill_Sound_Buffer, t_GameStats, t_CPUStats;
-
-
-
 uint32_t count_t_Read_TS=0,
         count_t_Read_Accelerometer=0,
 	 			count_t_Sound_Manager=0,
@@ -27,6 +22,11 @@ uint32_t count_t_Read_TS=0,
 				count_t_CPUStats=0,
 				count_idle=0,
 				count_total=0;
+
+extern OS_TID t_Read_TS, t_Read_Accelerometer, t_Sound_Manager, t_US,
+							t_Refill_Sound_Buffer, t_GameStats, t_CPUStats;
+OS_TID interrupted_task;
+//uint32_t count_total=0;
 
 /*	float util_t_Read_TS=0,
         util_t_Read_Accelerometer=0,
@@ -41,7 +41,7 @@ uint32_t count_t_Read_TS=0,
 void PIT_IRQHandler() {
 	unsigned int s, e;
   unsigned int i;
-   OS_TID interrupted_task;	
+   	
 	//clear pending IRQ
 	NVIC_ClearPendingIRQ(PIT_IRQn);
 	
@@ -55,6 +55,7 @@ void PIT_IRQHandler() {
 		//check which task got interrupted
 		interrupted_task = isr_tsk_get();
 		count_total++;
+	  //isr_evt_set(EV_CPU_STAT_FROM_ISR,t_CPUStats);
 	if(interrupted_task==t_Read_TS)
 	{++count_t_Read_TS;}
 	else if(interrupted_task==t_Read_Accelerometer)
@@ -71,6 +72,7 @@ void PIT_IRQHandler() {
 	{++count_t_CPUStats;}
 	else if(interrupted_task==0xFF)
 	{++count_idle;}
+	
 /*
     util_t_Read_Accelerometer = (count_t_Read_Accelerometer/count_total)*100;
 		util_t_Read_TS = (count_t_Read_TS/count_total)*100;

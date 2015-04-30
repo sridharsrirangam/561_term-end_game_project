@@ -9722,12 +9722,12 @@ X __declspec(noreturn) void Task_CPUStats(void);
 N
 N
 N 
-Nextern OS_TID t_Read_TS, t_Read_Accelerometer, t_Sound_Manager, t_US, t_Refill_Sound_Buffer;
+Nextern OS_TID t_Read_TS, t_Read_Accelerometer, t_Sound_Manager, t_US, t_Refill_Sound_Buffer,t_CPUStats;
 N
 N 
 N// Game Constants
 N#define PADDLE_WIDTH (40)
-N#define PADDLE_HEIGHT (15)
+N#define PADDLE_HEIGHT (40)
 N#define PADDLE_Y_POS (TFT_HEIGHT-4-PADDLE_HEIGHT)
 N
 N// constants for coin dimensions
@@ -9744,7 +9744,7 @@ N#define EV_CPU_STAT_DISP (uint16_t)(0x0004)
 N#define EV_CPU_STAT_DONE (uint16_t)(0x0008)
 N#define EV_GAME_OVER_UPD (uint16_t)(0x0010)
 N#define EV_RESTART_GAME_UPD (uint16_t)(0x0020)
-N
+N#define EV_CPU_STAT_FROM_ISR (uint16_t)(0x0001)
 N
 N//Event flag for Read_TS
 N#define EV_RECD_CPU_STAT (uint16_t)(0x0001)
@@ -9768,6 +9768,11 @@ Nuint16_t Waveform[NUM_WAVEFORM_SAMPLES];
 Xuint16_t Waveform[(512)];
 N
 Nuint32_t WNG_Len=0;
+Nextern U64 RA_Stack[7][64];
+Nuint32_t stack_max_tsk2;
+Nuint32_t current_depth_tsk2;
+Nuint32_t stack_max_tsk4;
+Nuint32_t current_depth_tsk4;
 N
 Nvoid DAC_Init(void) {
 N  // Init DAC output
@@ -9917,24 +9922,52 @@ N
 N__task void Task_Sound_Manager(void) {
 X__declspec(noreturn) void Task_Sound_Manager(void) {
 N	
+N	uint8_t to_read_or_not_to_read=5;
+N	uint32_t element;
+N	uint8_t i;
 N	os_itv_set(1000);
 X	_os_itv_set((U32)rt_itv_set,1000);
-N	
+N		  
+Ncurrent_depth_tsk2 = (((uint32_t)&RA_Stack[2][63])+8- __current_sp());
+N	//current_depth_tsk2= __current_sp();
+N	//current_depth_tsk2=(uint32_t)&RA_Stack[2][63];
+N
 N	while (1) {
 N		//os_itv_wait();
 N				os_evt_wait_and(EV_PLAYSOUND, WAIT_FOREVER); // wait for trigger
 X				_os_evt_wait((U32)rt_evt_wait,(1),(0xffff),1); 
+N		
 N		// make a new sound every second
 N		
 N		// Hack - temporary code until voice code is added
 N		WNG_Len = 2500;
 N		Play_Waveform_with_DMA();
+N			to_read_or_not_to_read--;
+N		if(to_read_or_not_to_read==0)
+N		{
+N     for(i=1;i<63;i++)
+N       {
+N				 element = RA_Stack[2][i];
+N				 if(element !=0)
+N				 { stack_max_tsk2 = i;
+N					 to_read_or_not_to_read=5;
+N					 	
+N
+N					 break;
+N				 }
+N			 }
+N		 }			 
+N	
+N		
 N	}
 N}
 N
 N__task void Task_Refill_Sound_Buffer(void) {
 X__declspec(noreturn) void Task_Refill_Sound_Buffer(void) {
 N	uint32_t i;
+N	uint8_t to_read_or_not_to_read=5;
+N	uint32_t element;
+N	uint8_t j;
 N	/*
 N	uint16_t Wave[512];
 N		for (i=0; i<NUM_WAVEFORM_SAMPLES; i++)
@@ -9942,9 +9975,18 @@ N	{
 N		Wave[i] = i;
 N	}
 N	*/
+N	
+Ncurrent_depth_tsk4 = (((uint32_t)&RA_Stack[4][63])+ 8- __current_sp());	
+N		//current_depth_tsk4= __current_sp();
+N	//current_depth_tsk4=(uint32_t)&RA_Stack[4][63];
+N
+N
 N	while (1) {
 N		os_evt_wait_and(EV_REFILL_SOUND, WAIT_FOREVER); // wait for trigger
 X		_os_evt_wait((U32)rt_evt_wait,(1),(0xffff),1); 
+N
+N					 
+N//current_depth_tsk4= __current_sp();
 N
 N		for (i=0; i<NUM_WAVEFORM_SAMPLES; i++) {
 X		for (i=0; i<(512); i++) {
@@ -9958,8 +10000,24 @@ N				Waveform[i] = MAX_DAC_CODE/2;
 X				Waveform[i] = (4095)/2;
 N			}
 N		}
-N	}
-N}
+N	to_read_or_not_to_read--;
+N		if(to_read_or_not_to_read==0)
+N		{
+N     for(j=1;j<63;j++)
+N       {
+N				 element = RA_Stack[4][j];
+N				 if(element !=0)
+N				 { stack_max_tsk4 = j;
+N					 to_read_or_not_to_read=5;
+N					 
 N
+N					 break;
+N				 }
+N			 }
+N		 }
+N		
+N			
+N}
+N}
 N
 N
