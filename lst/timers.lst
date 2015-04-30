@@ -8278,7 +8278,7 @@ N	 			count_t_Sound_Manager=0,
 N				count_t_US=0,
 N				count_t_Refill_Sound_Buffer=0,
 N				count_t_GameStats=0,
-N				count_t_CPUStats=0,
+N				//count_t_CPUStats=0,
 N				count_idle=0,
 N				count_total=0;
 N
@@ -8330,8 +8330,8 @@ N	else if(interrupted_task==t_Refill_Sound_Buffer)
 N	{++count_t_Refill_Sound_Buffer;}
 N	else if(interrupted_task==t_GameStats)
 N	{++count_t_GameStats;}
-N	else if(interrupted_task==t_CPUStats)
-N	{++count_t_CPUStats;}
+N	//else if(interrupted_task==t_CPUStats)
+N	//{++count_t_CPUStats;}
 N	else if(interrupted_task==0xFF)
 N	{++count_idle;}
 N	

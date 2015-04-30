@@ -57,18 +57,36 @@ OS_MBX TS_mailbox;
 os_mbx_declare(ACCL_mailbox,2);
 os_mbx_declare(TS_mailbox,2);
 
+<<<<<<< HEAD
 int test=0;
 uint32_t sp;
+=======
+
+>>>>>>> origin/master
 
 //float roll=0.0;
 //int test;
 //int test2;
 
+<<<<<<< HEAD
 
 extern uint32_t count_total;
 
 
 
+=======
+extern uint32_t count_t_Read_TS,
+        count_t_Read_Accelerometer,
+	 			count_t_Sound_Manager,
+				count_t_US,
+				count_t_Refill_Sound_Buffer,
+				count_t_GameStats,
+				//count_t_CPUStats,
+				count_idle,
+				count_total;
+
+
+>>>>>>> origin/master
   
 
 void Init_Debug_Signals(void) {
@@ -125,9 +143,12 @@ __task void Task_Read_TS(void) {
 	int* TRT_mbx_buf;
 	uint16_t temp_Yval;
 	int debounce=0,flag=0,stat_or_restart=0; // 0 for stat
+<<<<<<< HEAD
 	uint8_t to_read_or_not_to_read=100;
 	uint32_t element;
 	uint8_t i;
+=======
+>>>>>>> origin/master
 	
 	os_mbx_init(&TS_mailbox,sizeof(TS_mailbox)); // number of elements being sent
 	
@@ -238,9 +259,13 @@ current_depth_tsk0 = (((uint32_t)&RA_Stack[0][63])+8 - __current_sp());
 //-------------------------------------------------------------------
 __task void Task_Read_Accelerometer(void) {
 	//char buffer[16];
+<<<<<<< HEAD
 	uint8_t to_read_or_not_to_read=100;
 	uint32_t element;
 	uint8_t i;
+=======
+	
+>>>>>>> origin/master
 	//buffer to send data using a mailbox
 	float* TRA_mbx_buf;
 	
@@ -327,7 +352,11 @@ __task void Task_Update_Screen(void) {
 	
 	
 	
+<<<<<<< HEAD
 	 int8_t array_number [10][10] = {0,0,0,1,1,1,0,0,0,0,
+=======
+	const int8_t array_number [10][10] = {0,0,0,1,1,1,0,0,0,0,
+>>>>>>> origin/master
 																	0,0,1,1,1,1,1,1,0,0,
 																	0,1,1,1,1,1,1,1,1,0,
 																	0,1,1,1,1,1,1,1,1,0,
@@ -524,16 +553,20 @@ __task void Task_CPUStats(void)
 	int* CPUS_mbx_buf;
 	//int iter;
 	
+<<<<<<< HEAD
 	uint8_t to_read_or_not_to_read=1;
 	uint32_t element;
 	uint8_t i;
 	
+=======
+>>>>>>> origin/master
 	float util_t_Read_TS=0,
         util_t_Read_Accelerometer=0,
 	 			util_t_Sound_Manager=0,
 				util_t_US=0,
 				util_t_Refill_Sound_Buffer=0,
 				util_t_GameStats=0,
+<<<<<<< HEAD
 				util_t_CPUStats=0,
 				util_idle=0,
        	util_total=0;	
@@ -554,6 +587,11 @@ __task void Task_CPUStats(void)
 	float max_tsk6_per;
 	float dept_tsk7_per;
 	float max_tsk7_per;
+=======
+				//util_t_CPUStats=0,
+				util_idle=0,
+       	util_total=0;	
+>>>>>>> origin/master
 	
 	os_itv_set(1000);
 	current_depth_tsk6 = (((uint32_t)&RA_Stack[6][63]) +8 - __current_sp());
@@ -595,7 +633,11 @@ __task void Task_CPUStats(void)
 				// tsk_lock();
 					
 				//	os_mut_wait(&PAUSE_GAME_mutex,WAIT_FOREVER);
+<<<<<<< HEAD
 					os_tsk_prio_self(9);
+=======
+					os_tsk_prio_self(8);
+>>>>>>> origin/master
 					os_evt_set(EV_CPU_STAT_DISP,t_US);
 					os_evt_set(EV_RECD_CPU_STAT,t_Read_TS);
 			 

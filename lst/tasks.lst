@@ -9455,18 +9455,36 @@ XU32 ACCL_mailbox [4 + 2];
 Nos_mbx_declare(TS_mailbox,2);
 XU32 TS_mailbox [4 + 2];
 N
+<<<<<<< HEAD
 Nint test=0;
 Nuint32_t sp;
+=======
+N
+>>>>>>> origin/master
 N
 N//float roll=0.0;
 N//int test;
 N//int test2;
 N
+<<<<<<< HEAD
 N
 Nextern uint32_t count_total;
 N
 N
 N
+=======
+Nextern uint32_t count_t_Read_TS,
+N        count_t_Read_Accelerometer,
+N	 			count_t_Sound_Manager,
+N				count_t_US,
+N				count_t_Refill_Sound_Buffer,
+N				count_t_GameStats,
+N				//count_t_CPUStats,
+N				count_idle,
+N				count_total;
+N
+N
+>>>>>>> origin/master
 N  
 N
 Nvoid Init_Debug_Signals(void) {
@@ -9551,9 +9569,12 @@ N	PT_T p;
 N	int* TRT_mbx_buf;
 N	uint16_t temp_Yval;
 N	int debounce=0,flag=0,stat_or_restart=0; // 0 for stat
+<<<<<<< HEAD
 N	uint8_t to_read_or_not_to_read=100;
 N	uint32_t element;
 N	uint8_t i;
+=======
+>>>>>>> origin/master
 N	
 N	os_mbx_init(&TS_mailbox,sizeof(TS_mailbox)); // number of elements being sent
 X	_os_mbx_init((U32)rt_mbx_init,&TS_mailbox,sizeof(TS_mailbox)); 
@@ -9629,7 +9650,11 @@ N				else
 N				{// send mailbox
 N					
 N				if(!flag){	
+<<<<<<< HEAD
 W "src\tasks.c" 198 27 function "malloc" declared implicitly
+=======
+W "src\tasks.c" 154 27 function "malloc" declared implicitly
+>>>>>>> origin/master
 N					TRT_mbx_buf = (int*) malloc(sizeof(int));
 N					*TRT_mbx_buf = (int)temp_Yval;
 N					if(os_mbx_check(&TS_mailbox)!=0)
@@ -9679,9 +9704,13 @@ N//-------------------------------------------------------------------
 N__task void Task_Read_Accelerometer(void) {
 X__declspec(noreturn) void Task_Read_Accelerometer(void) {
 N	//char buffer[16];
+<<<<<<< HEAD
 N	uint8_t to_read_or_not_to_read=100;
 N	uint32_t element;
 N	uint8_t i;
+=======
+N	
+>>>>>>> origin/master
 N	//buffer to send data using a mailbox
 N	float* TRA_mbx_buf;
 N	
@@ -9707,6 +9736,7 @@ N		//current_depth_tsk1 = (uint16_t)((uint32_t)(&RA_Stack[1][63])) - __current_s
 N		PTB->PSOR = MASK(DEBUG_T0_POS);
 X		((GPIO_Type *)(0x400FF040u))->PSOR = (1UL << (0));
 N		//roll = read_full_xyz();
+<<<<<<< HEAD
 N	
 N		to_read_or_not_to_read--;
 N		if(to_read_or_not_to_read==0)
@@ -9724,6 +9754,11 @@ N		 }
 N	
 N
 W "src\tasks.c" 281 26 function "malloc" declared implicitly
+=======
+N		
+N		
+W "src\tasks.c" 216 26 function "malloc" declared implicitly
+>>>>>>> origin/master
 N		TRA_mbx_buf = (float*) malloc(sizeof(float));
 N		
 N		*TRA_mbx_buf = read_full_xyz();
@@ -9777,7 +9812,11 @@ N	uint8_t speed=5;
 N	
 N	
 N	
+<<<<<<< HEAD
 N	 int8_t array_number [10][10] = {0,0,0,1,1,1,0,0,0,0,
+=======
+N	const int8_t array_number [10][10] = {0,0,0,1,1,1,0,0,0,0,
+>>>>>>> origin/master
 N																	0,0,1,1,1,1,1,1,0,0,
 N																	0,1,1,1,1,1,1,1,1,0,
 N																	0,1,1,1,1,1,1,1,1,0,
@@ -9850,7 +9889,11 @@ N				paddle_pos=TFT_WIDTH/2;
 X				paddle_pos=(240)/2;
 N				
 N				coin_Y_pos=100;
+<<<<<<< HEAD
 W "src\tasks.c" 397 17 function "rand" declared implicitly
+=======
+W "src\tasks.c" 312 17 function "rand" declared implicitly
+>>>>>>> origin/master
 N				coin_X_pos=(rand()) % 230;
 N			}
 N			
@@ -9870,7 +9913,11 @@ N
 N		
 N		rollVal = *TUS_mbx_buf;
 N		
+<<<<<<< HEAD
 W "src\tasks.c" 415 3 function "free" declared implicitly
+=======
+W "src\tasks.c" 330 3 function "free" declared implicitly
+>>>>>>> origin/master
 N		free(TUS_mbx_buf);
 N		
 N		
@@ -9968,7 +10015,11 @@ N					}
 N			
 N					coin_Y_pos=100;
 N			
+<<<<<<< HEAD
 W "src\tasks.c" 495 18 function "rand" declared implicitly
+=======
+W "src\tasks.c" 396 18 function "rand" declared implicitly
+>>>>>>> origin/master
 N					coin_X_pos=(rand()) % 230;
 N				}
 N	//		TFT_Fill_Rectangle(&c1,&c2,&paddle_color);
@@ -9991,7 +10042,11 @@ N		PTB->PCOR = MASK(DEBUG_T3_POS);
 X		((GPIO_Type *)(0x400FF040u))->PCOR = (1UL << (3));
 N		}// flag
 N	}//while(1)
+<<<<<<< HEAD
 W "src\tasks.c" 318 7 variable "buffer" was declared but never referenced
+=======
+W "src\tasks.c" 249 7 variable "buffer" was declared but never referenced
+>>>>>>> origin/master
 N}
 N
 N
@@ -10004,16 +10059,20 @@ N	int y_pos;
 N	int* CPUS_mbx_buf;
 N	//int iter;
 N	
+<<<<<<< HEAD
 N	uint8_t to_read_or_not_to_read=1;
 N	uint32_t element;
 N	uint8_t i;
 N	
+=======
+>>>>>>> origin/master
 N	float util_t_Read_TS=0,
 N        util_t_Read_Accelerometer=0,
 N	 			util_t_Sound_Manager=0,
 N				util_t_US=0,
 N				util_t_Refill_Sound_Buffer=0,
 N				util_t_GameStats=0,
+<<<<<<< HEAD
 N				util_t_CPUStats=0,
 N				util_idle=0,
 N       	util_total=0;	
@@ -10034,6 +10093,11 @@ N	float dept_tsk6_per;
 N	float max_tsk6_per;
 N	float dept_tsk7_per;
 N	float max_tsk7_per;
+=======
+N				//util_t_CPUStats=0,
+N				util_idle=0,
+N       	util_total=0;	
+>>>>>>> origin/master
 N	
 N	os_itv_set(1000);
 X	_os_itv_set((U32)rt_itv_set,1000);
@@ -10054,7 +10118,11 @@ N
 N		//test2=y_pos;
 N		
 N		
+<<<<<<< HEAD
 W "src\tasks.c" 575 3 function "free" declared implicitly
+=======
+W "src\tasks.c" 454 3 function "free" declared implicitly
+>>>>>>> origin/master
 N		free(CPUS_mbx_buf);
 N			to_read_or_not_to_read--;
 N		if(to_read_or_not_to_read==0)
@@ -10078,8 +10146,13 @@ N				//os_tsk_prio(t_Read_TS,9);
 N				// tsk_lock();
 N					
 N				//	os_mut_wait(&PAUSE_GAME_mutex,WAIT_FOREVER);
+<<<<<<< HEAD
 N					os_tsk_prio_self(9);
 X					_os_tsk_prio((U32)rt_tsk_prio,0,9);
+=======
+N					os_tsk_prio_self(8);
+X					_os_tsk_prio((U32)rt_tsk_prio,0,8);
+>>>>>>> origin/master
 N					os_evt_set(EV_CPU_STAT_DISP,t_US);
 X					_os_evt_set((U32)rt_evt_set,(uint16_t)(0x0004),t_US);
 N					os_evt_set(EV_RECD_CPU_STAT,t_Read_TS);
@@ -10188,9 +10261,13 @@ N
 N	
 N	//free(CPUS_mbx_buf);
 N	}
+<<<<<<< HEAD
 W "src\tasks.c" 539 9 variable "util_total" was declared but never referenced
 W "src\tasks.c" 555 8 variable "dept_tsk7_per" was declared but never referenced
 W "src\tasks.c" 556 8 variable "max_tsk7_per" was declared but never referenced
+=======
+W "src\tasks.c" 436 9 variable "util_total" was declared but never referenced
+>>>>>>> origin/master
 N}// CPU Stats Task
 N
 N__task void Task_GameStats(void)
